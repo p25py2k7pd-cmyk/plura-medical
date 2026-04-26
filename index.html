@@ -434,6 +434,22 @@
       transform: translateX(-2px);
     }
 
+    @media (max-width: 480px) {
+      .subjects-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        font-size: 30px;
+      }
+      .lecture-item {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .lec-date {
+        display: none;
+      }
+    }
+
     .lec-pill {
       font-size: 9px;
       font-weight: 800;
@@ -512,7 +528,7 @@
       }
 
       .subjects-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
       }
 
       .lectures-section {

@@ -257,11 +257,6 @@
   let quizQs = [], quizIdx = 0, quizScore = 0, answered = false;
 
   const getQuestions = () => __allData;
-  window.practiceAnswer = practiceAnswer;
-window.startQuiz = startQuiz;
-window.quizAnswer = quizAnswer;
-window.nextQ = nextQ;
-window.closeQuiz = closeQuiz;
 
   function render() {
     const all = getQuestions();
@@ -380,6 +375,12 @@ window.closeQuiz = closeQuiz;
     document.getElementById('quiz-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
+
+  window.practiceAnswer = practiceAnswer;
+  window.startQuiz = startQuiz;
+  window.quizAnswer = quizAnswer;
+  window.nextQ = nextQ;
+  window.closeQuiz = closeQuiz;
 
   document.querySelectorAll('.pill').forEach(btn => {
     btn.addEventListener('click', () => {

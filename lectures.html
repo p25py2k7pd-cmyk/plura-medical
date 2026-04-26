@@ -74,8 +74,12 @@
     @media(max-width:640px){
       .navbar{padding:14px 20px;}.nav-links{display:none;}
       .page-hero{padding:32px 20px 16px;flex-direction:column;align-items:flex-start;gap:4px;}
-      .filter-bar{padding:0 20px 16px;}.search-box{margin-left:0;width:100%;}.search-box input{width:100%;}
+      .filter-bar{padding:0 20px 16px;flex-wrap:wrap;}.search-box{margin-left:0;width:100%;}.search-box input{width:100%;}
       .lectures-grid{grid-template-columns:1fr;padding:0 20px 48px;}
+    }
+    @media(max-width:480px){
+      .page-hero h1{font-size:28px;}
+      .pill{padding:6px 12px;font-size:11px;}
     }
   </style>
 </head>
@@ -172,9 +176,9 @@
 
   let activeFilter='all';
   const getLectures=()=>__allData;
-  window.openPDF = openPDF;
   function render(){
     const all=getLectures();
+    window.openPDF = openPDF;
     const q=document.getElementById('search-input').value.toLowerCase();
     const filtered=all.filter(l=>(activeFilter==='all'||l.subject===activeFilter)&&l.title.toLowerCase().includes(q));
     document.getElementById('lec-count').textContent=`${all.length} lecture${all.length!==1?'s':''}`;
