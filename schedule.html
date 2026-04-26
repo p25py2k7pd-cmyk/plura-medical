@@ -98,6 +98,135 @@
     .mini-label{font-size:12px;font-weight:500;}
     .mini-val{font-size:14px;font-weight:700;color:var(--purple);}
 
+
+    /* ─── POMODORO ─────────────────────────────────── */
+    .pomo-section { padding: 0 48px 48px; }
+    .pomo-card {
+      background: var(--navy);
+      border-radius: 18px;
+      padding: 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    /* Left: Timer */
+    .pomo-left { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+    .pomo-label {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      color: rgba(255,255,255,.4);
+    }
+
+    /* Clock ring */
+    .pomo-ring-wrap { position: relative; width: 180px; height: 180px; }
+    .pomo-svg { transform: rotate(-90deg); }
+    .pomo-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 8; }
+    .pomo-fill  { fill: none; stroke: var(--purple); stroke-width: 8;
+                  stroke-linecap: round; transition: stroke-dashoffset .9s linear;
+                  stroke-dasharray: 502; stroke-dashoffset: 0; }
+    .pomo-fill.break { stroke: #10b981; }
+    .pomo-time {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .pomo-digits {
+      font-size: 38px; font-weight: 900;
+      font-style: italic; letter-spacing: -2px;
+      color: #fff; line-height: 1;
+    }
+    .pomo-mode-label {
+      font-size: 10px; font-weight: 600;
+      color: rgba(255,255,255,.45);
+      text-transform: uppercase; letter-spacing: .8px;
+      margin-top: 4px;
+    }
+
+    /* Controls */
+    .pomo-controls { display: flex; gap: 10px; }
+    .btn-pomo {
+      padding: 10px 22px; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      border: none; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all .2s;
+    }
+    .btn-pomo.primary { background: var(--purple); color: #fff; }
+    .btn-pomo.primary:hover { background: #4a2de0; }
+    .btn-pomo.ghost {
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.7);
+    }
+    .btn-pomo.ghost:hover { background: rgba(255,255,255,.14); }
+
+    /* Session count */
+    .pomo-sessions { display: flex; gap: 6px; align-items: center; }
+    .pomo-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      transition: background .3s;
+    }
+    .pomo-dot.done { background: var(--purple); }
+    .pomo-sessions-label {
+      font-size: 10px; color: rgba(255,255,255,.4);
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; margin-left: 4px;
+    }
+
+    /* Right: Settings + Stats */
+    .pomo-right { display: flex; flex-direction: column; gap: 20px; }
+
+    .pomo-settings {
+      background: rgba(255,255,255,.05);
+      border-radius: 12px; padding: 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .pomo-settings-title {
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,.4);
+      text-transform: uppercase; letter-spacing: .8px;
+    }
+    .pomo-row { display: flex; align-items: center; justify-content: space-between; }
+    .pomo-row-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75); }
+    .pomo-slider-wrap { display: flex; align-items: center; gap: 10px; }
+    .pomo-val {
+      font-size: 15px; font-weight: 800;
+      color: var(--purple); min-width: 28px; text-align: right;
+    }
+    .pomo-slider {
+      -webkit-appearance: none; appearance: none;
+      width: 120px; height: 4px;
+      background: rgba(255,255,255,.15);
+      border-radius: 2px; outline: none; cursor: pointer;
+    }
+    .pomo-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%; background: var(--purple); cursor: pointer;
+    }
+
+    /* Today stats */
+    .pomo-stats {
+      display: flex; gap: 16px;
+    }
+    .pomo-stat {
+      flex: 1; background: rgba(255,255,255,.05);
+      border-radius: 10px; padding: 14px 16px;
+      text-align: center;
+    }
+    .pomo-stat-n { font-size: 24px; font-weight: 900; color: var(--purple); letter-spacing:-1px; }
+    .pomo-stat-l { font-size: 9px; font-weight: 700; color: rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+    @media(max-width:900px) { .pomo-card { grid-template-columns: 1fr; } }
+    @media(max-width:640px) {
+      .pomo-section { padding: 0 20px 48px; }
+      .pomo-ring-wrap { width: 160px; height: 160px; }
+      .pomo-digits { font-size: 32px; }
+    }
+
     @media(max-width:1024px){.main-grid{grid-template-columns:1fr;}}
     @media(max-width:640px){
       .navbar{padding:14px 20px;}.nav-links{display:none;}
@@ -211,12 +340,216 @@
   </div>
 </div>
 
+
+
+<!-- ── POMODORO ──────────────────────────────── -->
+<section class="pomo-section">
+  <div class="pomo-card">
+
+    <!-- TIMER -->
+    <div class="pomo-left">
+      <div class="pomo-label">Pomodoro Timer</div>
+
+      <div class="pomo-ring-wrap">
+        <svg class="pomo-svg" width="180" height="180" viewBox="0 0 180 180">
+          <circle class="pomo-track" cx="90" cy="90" r="80"/>
+          <circle class="pomo-fill" id="pomo-ring" cx="90" cy="90" r="80"/>
+        </svg>
+        <div class="pomo-time">
+          <div class="pomo-digits" id="pomo-digits">25:00</div>
+          <div class="pomo-mode-label" id="pomo-mode-label">Focus</div>
+        </div>
+      </div>
+
+      <div class="pomo-controls">
+        <button class="btn-pomo primary" id="btn-pomo-start" onclick="pomoToggle()">▶ Start</button>
+        <button class="btn-pomo ghost" onclick="pomoReset()">↺ Reset</button>
+      </div>
+
+      <div class="pomo-sessions">
+        <div class="pomo-dot" id="pd-0"></div>
+        <div class="pomo-dot" id="pd-1"></div>
+        <div class="pomo-dot" id="pd-2"></div>
+        <div class="pomo-dot" id="pd-3"></div>
+        <span class="pomo-sessions-label">Sessions</span>
+      </div>
+    </div>
+
+    <!-- SETTINGS + STATS -->
+    <div class="pomo-right">
+
+      <div class="pomo-settings">
+        <div class="pomo-settings-title">⚙️ Customize</div>
+
+        <div class="pomo-row">
+          <span class="pomo-row-label">Focus time</span>
+          <div class="pomo-slider-wrap">
+            <input type="range" class="pomo-slider" id="sl-focus" min="5" max="60" value="25"
+              oninput="pomoUpdateSettings()">
+            <span class="pomo-val" id="val-focus">25</span>
+            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
+          </div>
+        </div>
+
+        <div class="pomo-row">
+          <span class="pomo-row-label">Short break</span>
+          <div class="pomo-slider-wrap">
+            <input type="range" class="pomo-slider" id="sl-break" min="1" max="30" value="5"
+              oninput="pomoUpdateSettings()">
+            <span class="pomo-val" id="val-break">5</span>
+            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
+          </div>
+        </div>
+
+        <div class="pomo-row">
+          <span class="pomo-row-label">Long break</span>
+          <div class="pomo-slider-wrap">
+            <input type="range" class="pomo-slider" id="sl-long" min="5" max="60" value="15"
+              oninput="pomoUpdateSettings()">
+            <span class="pomo-val" id="val-long">15</span>
+            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pomo-stats">
+        <div class="pomo-stat">
+          <div class="pomo-stat-n" id="pomo-stat-sessions">0</div>
+          <div class="pomo-stat-l">Sessions Today</div>
+        </div>
+        <div class="pomo-stat">
+          <div class="pomo-stat-n" id="pomo-stat-mins">0</div>
+          <div class="pomo-stat-l">Minutes Focused</div>
+        </div>
+        <div class="pomo-stat">
+          <div class="pomo-stat-n" id="pomo-stat-streak">0</div>
+          <div class="pomo-stat-l">Day Streak 🔥</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+<script>
+
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let weekOffset = 0;
+const today    = new Date();
+const todayKey = today.toISOString().split('T')[0];
+const getTasks  = () => JSON.parse(localStorage.getItem('plura_tasks') || '{}');
+const saveTasks = t  => localStorage.setItem('plura_tasks', JSON.stringify(t));
+
+function addTask() {
+  const inp  = document.getElementById('task-input');
+  const subj = document.getElementById('task-subject').value;
+  const text = inp.value.trim();
+  if (!text) return;
+  const all = getTasks();
+  if (!all[todayKey]) all[todayKey] = [];
+  all[todayKey].push({ text, subject: subj, done: false, id: Date.now() });
+  saveTasks(all);
+  inp.value = '';
+  render();
+}
+
+function toggleTask(id) {
+  const all = getTasks();
+  const tasks = all[todayKey] || [];
+  const t = tasks.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  saveTasks(all);
+  updateStreak();
+  render();
+}
+
+function deleteTask(id) {
+  const all = getTasks();
+  if (all[todayKey]) all[todayKey] = all[todayKey].filter(t => t.id !== id);
+  saveTasks(all);
+  render();
+}
+
+function render() {
+  document.getElementById('today-date').textContent =
+    DAYS[today.getDay()] + ', ' + today.getDate() + ' ' + MONTHS[today.getMonth()] + ' ' + today.getFullYear();
+  const all   = getTasks();
+  const tasks = all[todayKey] || [];
+  const cont  = document.getElementById('today-tasks');
+  if (tasks.length === 0) {
+    cont.innerHTML = '<div style="color:rgba(255,255,255,.3);font-size:13px;padding:8px 0;">No tasks yet — add one below ↓</div>';
+  } else {
+    cont.innerHTML = tasks.map(t => `
+      <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
+        <div class="task-check">${t.done ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}</div>
+        <span class="task-text">${t.text}</span>
+        <span class="task-badge">${t.subject}</span>
+        <span onclick="event.stopPropagation();deleteTask(${t.id})" style="color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;padding:0 4px;">×</span>
+      </div>`).join('');
+  }
+  document.getElementById('ms-today').textContent = tasks.length;
+  document.getElementById('ms-done').textContent  = tasks.filter(t => t.done).length;
+  renderWeek();
+}
+
+function changeWeek(dir) { weekOffset += dir; renderWeek(); }
+
+function renderWeek() {
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay() + weekOffset * 7);
+  document.getElementById('week-label').textContent = 'Week of ' + start.getDate() + ' ' + MONTHS[start.getMonth()];
+  const all = getTasks();
+  document.getElementById('days-row').innerHTML = Array.from({length:7}, (_,i) => {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const key = d.toISOString().split('T')[0];
+    const isT = key === todayKey;
+    const hasT = all[key] && all[key].length > 0;
+    return '<div class="day-cell ' + (isT?'today':'') + ' ' + (hasT?'has-tasks':'') + '">' +
+      '<div class="day-name">' + DAYS[d.getDay()] + '</div>' +
+      '<div class="day-num">' + d.getDate() + '</div>' +
+      (hasT ? '<div class="day-dot"></div>' : '') + '</div>';
+  }).join('');
+}
+
+function renderProgress(lecs) {
+  const subjects = ['MGD','Metabolism','TOB','HD'];
+  const cont = document.getElementById('subj-progress');
+  cont.innerHTML = subjects.map(s => {
+    const n = lecs.filter(l=>l.subject===s).length;
+    const pct = lecs.length ? Math.round((n/Math.max(lecs.length,4))*100) : 0;
+    return '<div class="subject-progress">' +
+      '<div class="subj-row"><span class="subj-name">' + (s==='HD'?'H&D':s) + '</span><span class="subj-pct">' + n + ' lectures</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+  }).join('');
+}
+
+function updateStreak() {
+  const all = getTasks();
+  let streak = 0;
+  const d = new Date(today);
+  while (true) {
+    const key = d.toISOString().split('T')[0];
+    if ((all[key]||[]).some(t => t.done)) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  document.getElementById('streak-num').textContent = streak;
+  localStorage.setItem('plura_streak', streak);
+}
+
+document.getElementById('streak-num').textContent = localStorage.getItem('plura_streak') || 0;
+render();
+
+</script>
+
 <script type="module">
 
-  // Firebase for stats
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  const __db = getFirestore(initializeApp({
+  const db = getFirestore(initializeApp({
     apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
     authDomain:"plura-medical.firebaseapp.com",
     projectId:"plura-medical",
@@ -224,154 +557,172 @@
     messagingSenderId:"551828313411",
     appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
   }));
-  let __lecs=[], __mcqs=[], __fcs=[];
   async function loadFirebaseStats() {
     try {
       const [ls,qs,fs] = await Promise.all([
-        getDocs(query(collection(__db,'lectures'),  orderBy('createdAt','desc'))),
-        getDocs(query(collection(__db,'questions'), orderBy('createdAt','desc'))),
-        getDocs(query(collection(__db,'flashcards'),orderBy('createdAt','desc')))
+        getDocs(query(collection(db,'lectures'),  orderBy('createdAt','desc'))),
+        getDocs(query(collection(db,'questions'), orderBy('createdAt','desc'))),
+        getDocs(query(collection(db,'flashcards'),orderBy('createdAt','desc')))
       ]);
-      __lecs = ls.docs.map(d=>({id:d.id,...d.data()}));
-      __mcqs = qs.docs.map(d=>({id:d.id,...d.data()}));
-      __fcs  = fs.docs.map(d=>({id:d.id,...d.data()}));
+      const lecs = ls.docs.map(d=>({id:d.id,...d.data()}));
+      document.getElementById('ms-lec').textContent   = lecs.length;
+      document.getElementById('ms-flash').textContent = fs.size;
+      document.getElementById('ms-mcq').textContent   = qs.size;
+      if (typeof renderProgress === 'function') renderProgress(lecs);
     } catch(e) { console.error('Firebase:', e); }
   }
-
-  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  let weekOffset = 0;
-  const today = new Date();
-  const todayKey = today.toISOString().split('T')[0];
-
-  const getTasks = () => JSON.parse(localStorage.getItem('plura_tasks') || '{}');
-  const saveTasks = t => localStorage.setItem('plura_tasks', JSON.stringify(t));
-
-  function addTask() {
-    const inp = document.getElementById('task-input');
-    const subj = document.getElementById('task-subject').value;
-    const text = inp.value.trim();
-    if (!text) return;
-    const all = getTasks();
-    if (!all[todayKey]) all[todayKey] = [];
-    all[todayKey].push({ text, subject: subj, done: false, id: Date.now() });
-    saveTasks(all);
-    inp.value = '';
-    render();
-  }
-
-  function toggleTask(id) {
-    const all = getTasks();
-    const tasks = all[todayKey] || [];
-    const t = tasks.find(t => t.id === id);
-    if (t) t.done = !t.done;
-    saveTasks(all);
-    updateStreak();
-    render();
-  }
-
-  function deleteTask(id) {
-    const all = getTasks();
-    if (all[todayKey]) all[todayKey] = all[todayKey].filter(t => t.id !== id);
-    saveTasks(all);
-    render();
-  }
-
-  function render() {
-    // Today date
-    document.getElementById('today-date').textContent =
-      `${DAYS[today.getDay()]}, ${today.getDate()} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`;
-
-    // Tasks
-    const all = getTasks();
-    const tasks = all[todayKey] || [];
-    const container = document.getElementById('today-tasks');
-    if (tasks.length === 0) {
-      container.innerHTML = '<div style="color:rgba(255,255,255,.3);font-size:13px;padding:8px 0;">No tasks yet — add one below ↓</div>';
-    } else {
-      container.innerHTML = tasks.map(t => `
-        <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
-          <div class="task-check">${t.done ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}</div>
-          <span class="task-text">${t.text}</span>
-          <span class="task-badge">${t.subject}</span>
-          <span onclick="event.stopPropagation();deleteTask(${t.id})" style="color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;padding:0 4px;">×</span>
-        </div>
-      `).join('');
-    }
-
-    // Quick stats
-    document.getElementById('ms-today').textContent = tasks.length;
-    document.getElementById('ms-done').textContent = tasks.filter(t => t.done).length;
-    document.getElementById('ms-lec').textContent = __lecs.length;
-    document.getElementById('ms-flash').textContent = __fcs.length;
-    document.getElementById('ms-mcq').textContent = __mcqs.length;
-
-    renderWeek();
-    renderProgress();
-  }
-
-  function changeWeek(dir) { weekOffset += dir; renderWeek(); }
-
-  function renderWeek() {
-    const start = new Date(today);
-    start.setDate(today.getDate() - today.getDay() + weekOffset * 7);
-    document.getElementById('week-label').textContent =
-      `Week of ${start.getDate()} ${MONTHS[start.getMonth()]}`;
-
-    const all = getTasks();
-    const row = document.getElementById('days-row');
-    row.innerHTML = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start); d.setDate(start.getDate() + i);
-      const key = d.toISOString().split('T')[0];
-      const isToday = key === todayKey;
-      const hasTasks = all[key] && all[key].length > 0;
-      return `
-        <div class="day-cell ${isToday ? 'today' : ''} ${hasTasks ? 'has-tasks' : ''}">
-          <div class="day-name">${DAYS[d.getDay()]}</div>
-          <div class="day-num">${d.getDate()}</div>
-          ${hasTasks ? '<div class="day-dot"></div>' : ''}
-        </div>
-      `;
-    }).join('');
-  }
-
-  function renderProgress() {
-    const lecs = __lecs;
-    const subjects = ['MGD', 'Metabolism', 'TOB', 'HD'];
-    const total = Math.max(lecs.length, 1);
-    const container = document.getElementById('subj-progress');
-    container.innerHTML = subjects.map(s => {
-      const count = lecs.filter(l => l.subject === s).length;
-      const pct = Math.round((count / Math.max(lecs.length, 4)) * 100) || 0;
-      return `
-        <div class="subject-progress">
-          <div class="subj-row">
-            <span class="subj-name">${s === 'HD' ? 'H&D' : s}</span>
-            <span class="subj-pct">${count} lectures</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  function updateStreak() {
-    const all = getTasks();
-    let streak = 0;
-    const d = new Date(today);
-    while (true) {
-      const key = d.toISOString().split('T')[0];
-      const tasks = all[key] || [];
-      if (tasks.some(t => t.done)) { streak++; d.setDate(d.getDate() - 1); }
-      else break;
-    }
-    document.getElementById('streak-num').textContent = streak;
-    localStorage.setItem('plura_streak', streak);
-  }
-
-  document.getElementById('streak-num').textContent = localStorage.getItem('plura_streak') || 0;
-  loadFirebaseStats().then(() => render());
+  loadFirebaseStats();
 
 </script>
+
+<script>
+
+  // ── POMODORO LOGIC ──────────────────────────────────────────────
+  let pomoTimer = null;
+  let pomoSecondsLeft = 25 * 60;
+  let pomoTotalSeconds = 25 * 60;
+  let pomoRunning = false;
+  let pomoMode = 'focus'; // 'focus' | 'break' | 'long'
+  let pomoSessionCount = 0;
+  const CIRCUMFERENCE = 2 * Math.PI * 80; // 502.65
+
+  const pomoTodayKey = 'pomo_' + new Date().toISOString().split('T')[0];
+  let pomoStats = JSON.parse(localStorage.getItem(pomoTodayKey) || '{"sessions":0,"mins":0}');
+
+  function getFocusMins()  { return parseInt(document.getElementById('sl-focus').value); }
+  function getBreakMins()  { return parseInt(document.getElementById('sl-break').value); }
+  function getLongMins()   { return parseInt(document.getElementById('sl-long').value); }
+
+  function pomoUpdateSettings() {
+    document.getElementById('val-focus').textContent = getFocusMins();
+    document.getElementById('val-break').textContent = getBreakMins();
+    document.getElementById('val-long').textContent  = getLongMins();
+    if (!pomoRunning) pomoReset();
+  }
+
+  function pomoReset() {
+    clearInterval(pomoTimer);
+    pomoRunning = false;
+    pomoMode = 'focus';
+    pomoSecondsLeft = getFocusMins() * 60;
+    pomoTotalSeconds = pomoSecondsLeft;
+    document.getElementById('btn-pomo-start').textContent = '▶ Start';
+    pomoUpdateDisplay();
+  }
+
+  function pomoToggle() {
+    if (pomoRunning) {
+      clearInterval(pomoTimer);
+      pomoRunning = false;
+      document.getElementById('btn-pomo-start').textContent = '▶ Resume';
+    } else {
+      pomoRunning = true;
+      document.getElementById('btn-pomo-start').textContent = '⏸ Pause';
+      pomoTimer = setInterval(() => {
+        pomoSecondsLeft--;
+        pomoUpdateDisplay();
+        if (pomoSecondsLeft <= 0) pomoNextPhase();
+      }, 1000);
+    }
+  }
+
+  function pomoNextPhase() {
+    clearInterval(pomoTimer);
+    pomoRunning = false;
+
+    if (pomoMode === 'focus') {
+      // Completed a focus session
+      pomoSessionCount++;
+      pomoStats.sessions++;
+      pomoStats.mins += getFocusMins();
+      localStorage.setItem(pomoTodayKey, JSON.stringify(pomoStats));
+      pomoUpdateStats();
+      pomoUpdateDots();
+
+      // Play soft bell
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880; o.type = 'sine';
+        g.gain.setValueAtTime(0.3, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+        o.start(); o.stop(ctx.currentTime + 1.2);
+      } catch(e) {}
+
+      // After 4 sessions = long break
+      if (pomoSessionCount % 4 === 0) {
+        pomoMode = 'long';
+        pomoSecondsLeft = getLongMins() * 60;
+      } else {
+        pomoMode = 'break';
+        pomoSecondsLeft = getBreakMins() * 60;
+      }
+    } else {
+      // Break done → back to focus
+      pomoMode = 'focus';
+      pomoSecondsLeft = getFocusMins() * 60;
+    }
+
+    pomoTotalSeconds = pomoSecondsLeft;
+    pomoUpdateDisplay();
+    document.getElementById('btn-pomo-start').textContent = '▶ Start';
+
+    // Show browser notification if allowed
+    if (Notification.permission === 'granted') {
+      new Notification('Plura Medical 🍅', {
+        body: pomoMode === 'focus' ? 'Break over! Time to focus 💪' : 'Session done! Take a break ☕',
+        icon: ''
+      });
+    }
+  }
+
+  function pomoUpdateDisplay() {
+    const m = Math.floor(pomoSecondsLeft / 60).toString().padStart(2, '0');
+    const s = (pomoSecondsLeft % 60).toString().padStart(2, '0');
+    document.getElementById('pomo-digits').textContent = `${m}:${s}`;
+
+    const modeLabels = { focus: 'Focus 🎯', break: 'Short Break ☕', long: 'Long Break 🌿' };
+    document.getElementById('pomo-mode-label').textContent = modeLabels[pomoMode];
+
+    // Ring progress
+    const progress = pomoSecondsLeft / pomoTotalSeconds;
+    const offset = CIRCUMFERENCE * (1 - progress);
+    const ring = document.getElementById('pomo-ring');
+    ring.style.strokeDashoffset = offset;
+    ring.style.strokeDasharray = CIRCUMFERENCE;
+    ring.classList.toggle('break', pomoMode !== 'focus');
+
+    // Page title
+    document.title = `${m}:${s} — Plura Medical`;
+  }
+
+  function pomoUpdateDots() {
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById('pd-' + i);
+      if (el) el.classList.toggle('done', i < (pomoSessionCount % 5));
+    }
+  }
+
+  function pomoUpdateStats() {
+    document.getElementById('pomo-stat-sessions').textContent = pomoStats.sessions;
+    document.getElementById('pomo-stat-mins').textContent = pomoStats.mins;
+    document.getElementById('pomo-stat-streak').textContent =
+      localStorage.getItem('plura_streak') || 0;
+  }
+
+  // Request notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  // Init
+  pomoUpdateDisplay();
+  pomoUpdateStats();
+  pomoUpdateDots();
+
+</script>
+
 </body>
 </html>
