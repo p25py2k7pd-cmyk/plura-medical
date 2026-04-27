@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Yourself — Plura Medical</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,900;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#00002d;--purple:#5b39f3;--purple-lt:#a28ff9;--bg:#f7f5ff;--white:#fff;--border:rgba(91,57,243,0.1);--muted:rgba(0,0,45,0.4);}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--navy);}
+    a{text-decoration:none;color:inherit;}
+
+    /* NAV */
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(247,245,255,0.93);backdrop-filter:blur(14px);z-index:100;}
+    .logo{display:flex;align-items:center;gap:10px;}
+    .nav-links{display:flex;gap:32px;list-style:none;}
+    .nav-links a{font-size:12px;font-weight:600;color:var(--navy);opacity:.45;transition:opacity .2s;}
+    .nav-links a:hover{opacity:1;}
+    .nav-links a.active{opacity:1;color:var(--purple);}
+    .nav-cta{background:var(--purple);color:var(--bg);padding:9px 22px;border-radius:7px;font-size:12px;font-weight:700;}
+
+    /* HERO */
+    .page-hero{padding:44px 48px 28px;}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:16px;cursor:pointer;transition:color .2s;}
+    .back-btn:hover{color:var(--purple);}
+    .page-hero h1{font-size:34px;font-weight:900;font-style:italic;letter-spacing:-1.5px;}
+    .page-hero-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+    .hero-badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+    .hbadge{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);}
+    .hbadge span{color:var(--purple);}
+
+    /* TABS */
+    .tab-bar{display:flex;gap:0;padding:0 48px;border-bottom:1px solid var(--border);margin-bottom:32px;}
+    .tab{padding:14px 24px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all .2s;}
+    .tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+    .tab:hover:not(.active){color:var(--navy);opacity:.7;}
+
+    /* SECTION WRAPPER */
+    .section{padding:0 48px 64px;display:none;}
+    .section.active{display:block;}
+
+    /* ── MCQ ── */
+    .q-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+    .q-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px 20px;transition:box-shadow .2s;}
+    .q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .q-num{font-size:10px;color:var(--muted);font-weight:600;}
+    .q-text{font-size:14px;font-weight:600;line-height:1.5;margin-bottom:14px;}
+    .q-opts{display:flex;flex-direction:column;gap:6px;}
+    .q-opt{font-size:12px;padding:9px 12px;border-radius:7px;border:1.2px solid var(--border);cursor:pointer;font-family:'Poppins',sans-serif;text-align:left;background:var(--bg);font-weight:500;transition:all .15s;}
+    .q-opt:hover:not(:disabled){border-color:var(--purple);background:rgba(91,57,243,.04);}
+    .q-opt.correct{background:#d1fae5;border-color:#10b981;color:#064e3b;font-weight:700;}
+    .q-opt.wrong{background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
+    .q-opt.reveal-correct{background:#d1fae5;border-color:#10b981;}
+    .q-explain{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;display:none;padding:10px 12px;background:rgba(91,57,243,.04);border-radius:8px;border-left:3px solid var(--purple);}
+
+    /* MCQ progress bar */
+    .mcq-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+    .mcq-score{font-size:13px;font-weight:700;color:var(--purple);}
+    .btn-reset{font-size:12px;font-weight:600;padding:7px 16px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;}
+    .btn-reset:hover{border-color:var(--purple);color:var(--purple);}
+
+    /* ── FLASHCARDS ── */
+    .fc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .fc-card{perspective:800px;cursor:pointer;min-height:160px;}
+    .fc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s ease;}
+    .fc-card.flipped .fc-inner{transform:rotateY(180deg);}
+    .fc-front,.fc-back{position:absolute;inset:0;border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+    .fc-front{background:var(--white);border:1px solid var(--border);}
+    .fc-back{background:var(--purple);color:#fff;transform:rotateY(180deg);}
+    .fc-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;opacity:.5;}
+    .fc-text{font-size:13px;font-weight:600;line-height:1.5;}
+    .fc-hint{font-size:10px;margin-top:12px;opacity:.4;font-weight:500;}
+
+    .fc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+    .fc-info{font-size:13px;font-weight:600;color:var(--muted);}
+
+    /* EMPTY / LOADING */
+    .empty-state{text-align:center;padding:80px 20px;}
+    .empty-icon{font-size:52px;margin-bottom:16px;}
+    .empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+    .empty-state p{font-size:13px;color:var(--muted);}
+    .loader{text-align:center;padding:80px 20px;font-size:14px;color:var(--muted);}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .q-grid{grid-template-columns:1fr;}
+      .fc-grid{grid-template-columns:repeat(2,1fr);}
+    }
+    @media(max-width:640px){
+      .navbar{padding:14px 20px;}.nav-links{display:none;}
+      .page-hero{padding:28px 20px 20px;}
+      .tab-bar{padding:0 20px;}
+      .section{padding:0 20px 48px;}
+      .fc-grid{grid-template-columns:1fr;}
+      .page-hero h1{font-size:26px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="logo">
+    <svg height="38" viewBox="0 0 40.93 47.71" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+      <polygon points="40.93 35.44 20.46 23.17 20.46 0 40.93 35.44" fill="#5b39f3"/>
+      <polygon points="40.93 35.44 0 35.44 20.46 0 20.46 23.17 40.93 35.44" fill="#ffffff"/>
+      <polygon points="40.93 35.44 0 35.44 20.46 23.17 40.93 35.44" fill="#00002d"/>
+      <polygon points="0 35.44 40.93 35.44 20.46 47.71 0 35.44" fill="#00002d"/>
+    </svg>
+    <svg height="36" viewBox="0 0 90.09 35.9" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+      <defs><style>
+        .pk-plura{font-family:'PlanetKosmos',sans-serif;font-size:20.69px;fill:#00002d;}
+        .pk-tm{font-family:'Poppins',sans-serif;font-weight:700;font-size:6.09px;fill:#5b39f3;}
+        .pk-med{font-family:'Poppins',sans-serif;font-weight:700;font-size:5.44px;fill:#00002d;}
+      </style></defs>
+      <text class="pk-tm" transform="translate(80.9 5.19)"><tspan x="0" y="0">TM</tspan></text>
+      <text class="pk-plura" transform="translate(1.24 22.7)"><tspan x="0" y="0">plura</tspan></text>
+      <text class="pk-med" transform="translate(9.62 29.94)"><tspan x="0" y="0">medical</tspan></text>
+    </svg>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="lectures.html" class="active">Lectures</a></li>
+    <li><a href="exams.html">Exams</a></li>
+    <li><a href="flashcards.html">Flashcards</a></li>
+    <li><a href="schedule.html">Schedule</a></li>
+  </ul>
+  <a href="admin.html" class="nav-cta">Admin ⚡</a>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="back-btn" onclick="history.back()">← Back to Lectures</div>
+  <h1 id="hero-title">Test Yourself</h1>
+  <p class="page-hero-sub" id="hero-sub">Loading lecture...</p>
+  <div class="hero-badges" id="hero-badges"></div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab active" id="tab-mcq" onclick="switchTab('mcq')">📝 MCQ Questions <span id="mcq-count" style="font-size:10px;opacity:.5;margin-left:4px;">0</span></div>
+  <div class="tab" id="tab-fc" onclick="switchTab('fc')">🃏 Flashcards <span id="fc-count" style="font-size:10px;opacity:.5;margin-left:4px;">0</span></div>
+</div>
+
+<!-- MCQ SECTION -->
+<div class="section active" id="section-mcq">
+  <div id="mcq-loader" class="loader">Loading questions...</div>
+  <div id="mcq-content" style="display:none;">
+    <div class="mcq-header">
+      <div class="mcq-score" id="mcq-score"></div>
+      <button class="btn-reset" onclick="resetMCQ()">↺ Reset</button>
+    </div>
+    <div class="q-grid" id="q-grid"></div>
+  </div>
+  <div class="empty-state" id="mcq-empty" style="display:none;">
+    <div class="empty-icon">📝</div>
+    <h3>No MCQ questions yet</h3>
+    <p>The admin hasn't added any MCQ questions for this lecture yet.</p>
+  </div>
+</div>
+
+<!-- FLASHCARDS SECTION -->
+<div class="section" id="section-fc">
+  <div id="fc-loader" class="loader">Loading flashcards...</div>
+  <div id="fc-content" style="display:none;">
+    <div class="fc-header">
+      <div class="fc-info" id="fc-info"></div>
+      <button class="btn-reset" onclick="resetFC()">↺ Flip All Back</button>
+    </div>
+    <div class="fc-grid" id="fc-grid"></div>
+  </div>
+  <div class="empty-state" id="fc-empty" style="display:none;">
+    <div class="empty-icon">🃏</div>
+    <h3>No flashcards yet</h3>
+    <p>The admin hasn't added any flashcards for this lecture yet.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const __db = getFirestore(initializeApp({
+    apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
+    authDomain:"plura-medical.firebaseapp.com",
+    projectId:"plura-medical",
+    storageBucket:"plura-medical.firebasestorage.app",
+    messagingSenderId:"551828313411",
+    appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
+  }));
+
+  // ── READ LECTURE ID FROM URL ─────────────────────────────────────────────
+  const params    = new URLSearchParams(window.location.search);
+  const lectureId = params.get('id');
+
+  if (!lectureId) {
+    document.getElementById('hero-title').textContent = 'Invalid Link';
+    document.getElementById('hero-sub').textContent = 'No lecture ID found in URL.';
+  }
+
+  // ── STATE ────────────────────────────────────────────────────────────────
+  let allQuestions  = [];
+  let answeredMap   = {}; // questionId → chosen index
+  let correctCount  = 0;
+
+  // ── TABS ─────────────────────────────────────────────────────────────────
+  window.switchTab = function(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('section-' + name).classList.add('active');
+  };
+
+  // ── LOAD LECTURE META ────────────────────────────────────────────────────
+  async function loadLectureMeta() {
+    try {
+      const snap = await getDoc(doc(__db, 'lectures', lectureId));
+      if (snap.exists()) {
+        const l = snap.data();
+        document.getElementById('hero-title').textContent = l.title;
+        document.getElementById('hero-sub').textContent = `Test yourself on this lecture`;
+        document.title = `Test — ${l.title} — Plura Medical`;
+        const subj = l.subject === 'HD' ? 'H&D' : l.subject;
+        document.getElementById('hero-badges').innerHTML = `
+          <div class="hbadge">${subj}</div>
+          <div class="hbadge">📅 ${l.date || ''}</div>
+        `;
+      }
+    } catch(e) { console.warn('Could not load lecture meta:', e); }
+  }
+
+  // ── LOAD MCQ ─────────────────────────────────────────────────────────────
+  async function loadMCQ() {
+    try {
+      const snap = await getDocs(query(collection(__db, 'questions'), where('lectureId', '==', lectureId)));
+      allQuestions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      document.getElementById('mcq-count').textContent = allQuestions.length;
+      document.getElementById('mcq-loader').style.display = 'none';
+
+      if (allQuestions.length === 0) {
+        document.getElementById('mcq-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('mcq-content').style.display = 'block';
+      renderMCQ();
+    } catch(e) {
+      console.error('MCQ load error:', e);
+      document.getElementById('mcq-loader').innerHTML = `<span style="color:#ef4444;">Error loading questions. Check Firebase indexes.</span>`;
+    }
+  }
+
+  function renderMCQ() {
+    updateScore();
+    document.getElementById('q-grid').innerHTML = allQuestions.map((q, qi) => {
+      const answered = answeredMap[q.id] !== undefined;
+      const chosen   = answeredMap[q.id];
+      return `
+        <div class="q-card">
+          <div class="q-top">
+            <span class="q-num">Q${qi + 1}</span>
+          </div>
+          <div class="q-text">${q.question}</div>
+          <div class="q-opts">
+            ${q.options.map((opt, oi) => {
+              let cls = '';
+              if (answered) {
+                if (oi === q.answer)               cls = 'correct';
+                else if (oi === chosen)            cls = 'wrong';
+              }
+              return `<button
+                class="q-opt ${cls}"
+                ${answered ? 'disabled' : ''}
+                onclick="answerQ('${q.id}', ${oi}, ${q.answer})"
+              >${['A','B','C','D'][oi]}. ${opt}</button>`;
+            }).join('')}
+          </div>
+          ${q.explanation && answered ? `<div class="q-explain" id="exp-${q.id}" style="display:block;">💡 ${q.explanation}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  window.answerQ = function(qId, chosen, correct) {
+    if (answeredMap[qId] !== undefined) return;
+    answeredMap[qId] = chosen;
+    if (chosen === correct) correctCount++;
+    renderMCQ();
+  };
+
+  function updateScore() {
+    const total    = allQuestions.length;
+    const answered = Object.keys(answeredMap).length;
+    document.getElementById('mcq-score').textContent =
+      answered === 0
+        ? `${total} question${total !== 1 ? 's' : ''}`
+        : `Score: ${correctCount} / ${answered} answered`;
+  }
+
+  window.resetMCQ = function() {
+    answeredMap  = {};
+    correctCount = 0;
+    renderMCQ();
+  };
+
+  // ── LOAD FLASHCARDS ───────────────────────────────────────────────────────
+  async function loadFlashcards() {
+    try {
+      const snap = await getDocs(query(collection(__db, 'flashcards'), where('lectureId', '==', lectureId)));
+      const fcs  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      document.getElementById('fc-count').textContent = fcs.length;
+      document.getElementById('fc-loader').style.display = 'none';
+
+      if (fcs.length === 0) {
+        document.getElementById('fc-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('fc-info').textContent = `${fcs.length} flashcard${fcs.length !== 1 ? 's' : ''} — tap to flip`;
+      document.getElementById('fc-content').style.display = 'block';
+
+      document.getElementById('fc-grid').innerHTML = fcs.map(f => `
+        <div class="fc-card" id="fc-${f.id}" onclick="flipCard('${f.id}')">
+          <div class="fc-inner">
+            <div class="fc-front">
+              <div class="fc-label">Question</div>
+              <div class="fc-text">${f.front}</div>
+              <div class="fc-hint">Tap to reveal answer</div>
+            </div>
+            <div class="fc-back">
+              <div class="fc-label" style="color:rgba(255,255,255,.6)">Answer</div>
+              <div class="fc-text">${f.back}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) {
+      console.error('Flashcard load error:', e);
+      document.getElementById('fc-loader').innerHTML = `<span style="color:#ef4444;">Error loading flashcards. Check Firebase indexes.</span>`;
+    }
+  }
+
+  window.flipCard = function(id) {
+    document.getElementById('fc-' + id).classList.toggle('flipped');
+  };
+
+  window.resetFC = function() {
+    document.querySelectorAll('.fc-card').forEach(c => c.classList.remove('flipped'));
+  };
+
+  // ── INIT ─────────────────────────────────────────────────────────────────
+  if (lectureId) {
+    loadLectureMeta();
+    loadMCQ();
+    loadFlashcards();
+  }
+</script>
+</body>
+</html>

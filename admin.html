@@ -241,6 +241,12 @@
           </select>
         </div>
         <div class="form-field">
+          <label class="form-label">Lecture (optional)</label>
+          <select class="form-select" id="q-lecture">
+            <option value="">— No specific lecture —</option>
+          </select>
+        </div>
+        <div class="form-field">
           <label class="form-label">Explanation (optional)</label>
           <input class="form-input" id="q-explain" placeholder="Why is this the correct answer?">
         </div>
@@ -274,6 +280,12 @@
             <option value="Metabolism">Metabolism</option>
             <option value="TOB">TOB</option>
             <option value="HD">H&D</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Lecture (optional)</label>
+          <select class="form-select" id="fc-lecture">
+            <option value="">— No specific lecture —</option>
           </select>
         </div>
       </div>
@@ -398,9 +410,24 @@
     loadLectures();
   };
 
+  function populateLectureDropdowns(lecs) {
+    ['q-lecture','fc-lecture'].forEach(selId => {
+      const el = document.getElementById(selId);
+      if (!el) return;
+      const cur = el.value;
+      el.innerHTML = '<option value="">— No specific lecture —</option>';
+      lecs.forEach(l => {
+        const subj = l.subject === 'HD' ? 'H&D' : l.subject;
+        el.innerHTML += `<option value="${l.id}">${subj} — ${l.title}</option>`;
+      });
+      el.value = cur;
+    });
+  }
+
   async function loadLectures() {
     const snap = await getDocs(query(collection(__db,'lectures'), orderBy('createdAt','desc')));
     const lecs = snap.docs.map(d => ({id:d.id,...d.data()}));
+    populateLectureDropdowns(lecs);
     document.getElementById('tc-lec').textContent = lecs.length;
     document.getElementById('lec-list').innerHTML = lecs.length === 0
       ? '<div class="list-empty">No lectures yet — add one above ↑</div>'
@@ -422,6 +449,9 @@
     const options     = [0,1,2,3].map(i => document.getElementById(`q-opt-${i}`).value.trim());
     const subject     = document.getElementById('q-subject').value;
     const explanation = document.getElementById('q-explain').value.trim();
+    const lecEl       = document.getElementById('q-lecture');
+    const lectureId   = lecEl.value || null;
+    const lectureName = lectureId ? lecEl.selectedOptions[0].text : null;
     if (!question || options.some(o => !o) || selectedAnswer < 0) {
       alert('Please fill all fields and select the correct answer.'); return;
     }
@@ -429,11 +459,13 @@
     try {
       await addDoc(collection(__db, 'questions'), {
         question, options, answer: selectedAnswer, subject, explanation,
+        lectureId, lectureName,
         createdAt: serverTimestamp()
       });
       document.getElementById('q-question').value = '';
       [0,1,2,3].forEach(i => document.getElementById(`q-opt-${i}`).value = '');
       document.getElementById('q-explain').value = '';
+      document.getElementById('q-lecture').value = '';
       selectedAnswer = -1;
       document.querySelectorAll('.ans-opt').forEach(el => el.classList.remove('checked'));
       showSuccess('q-ok');
@@ -471,12 +503,20 @@
     const front   = document.getElementById('fc-front').value.trim();
     const back    = document.getElementById('fc-back').value.trim();
     const subject = document.getElementById('fc-subject').value;
+    const fcLecEl     = document.getElementById('fc-lecture');
+    const lectureId   = fcLecEl.value || null;
+    const lectureName = lectureId ? fcLecEl.selectedOptions[0].text : null;
     if (!front || !back) { alert('Please fill in both sides.'); return; }
     setBtn('btn-add-fc', true);
     try {
-      await addDoc(collection(__db, 'flashcards'), { front, back, subject, createdAt: serverTimestamp() });
+      await addDoc(collection(__db, 'flashcards'), {
+        front, back, subject,
+        lectureId, lectureName,
+        createdAt: serverTimestamp()
+      });
       document.getElementById('fc-front').value = '';
       document.getElementById('fc-back').value = '';
+      document.getElementById('fc-lecture').value = '';
       showSuccess('fc-ok');
       loadFlashcards();
     } catch(e) { alert('Error: ' + e.message); }

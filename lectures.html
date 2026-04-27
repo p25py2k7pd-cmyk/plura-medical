@@ -53,6 +53,8 @@
     .lec-title{font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.3;}
     .lec-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:18px;min-height:32px;}
     .lec-open{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--purple);}
+    .test-btn{display:block;width:100%;margin-top:10px;padding:9px;background:transparent;border:1.5px solid var(--purple);color:var(--purple);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;text-align:center;}
+    .test-btn:hover{background:var(--purple);color:#fff;}
     .empty-state{text-align:center;padding:80px 48px;display:none;}
     .empty-icon{font-size:52px;margin-bottom:16px;}
     .empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;}
@@ -176,9 +178,9 @@
 
   let activeFilter='all';
   const getLectures=()=>__allData;
+  window.openPDF = openPDF;
   function render(){
     const all=getLectures();
-    window.openPDF = openPDF;
     const q=document.getElementById('search-input').value.toLowerCase();
     const filtered=all.filter(l=>(activeFilter==='all'||l.subject===activeFilter)&&l.title.toLowerCase().includes(q));
     document.getElementById('lec-count').textContent=`${all.length} lecture${all.length!==1?'s':''}`;
@@ -193,6 +195,7 @@
           <div class="lec-title">${l.title}</div>
           <div class="lec-desc">${l.description||'Click to open PDF'}</div>
           <span class="lec-open"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="1.5" stroke="#5b39f3" stroke-width="1.2"/><path d="M3.5 6h5M6 3.5v5" stroke="#5b39f3" stroke-width="1.2" stroke-linecap="round"/></svg>Open PDF</span>
+          <button class="test-btn" onclick="event.stopPropagation();window.open('test.html?id=${l.id}','_blank')">🧠 Test Yourself</button>
         </div>`).join('');
     }
   }
