@@ -248,7 +248,7 @@
           <div class="lec-title">${l.title}</div>
           <div class="lec-desc">${l.description||'Click to open PDF'}</div>
           <span class="lec-open"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="1.5" stroke="#5b39f3" stroke-width="1.2"/><path d="M3.5 6h5M6 3.5v5" stroke="#5b39f3" stroke-width="1.2" stroke-linecap="round"/></svg>Open PDF</span>
-          <button class="test-btn" onclick="event.stopPropagation();markLecViewed('${l.id}','${l.subject}',decodeURIComponent('${encodeURIComponent(l.title)}'));window.open('test.html?id=${l.id}','_blank')">🧠 Test Yourself</button>
+          <button class="test-btn" onclick="event.stopPropagation();markLecViewed('${l.id}','${l.subject}',decodeURIComponent('${encodeURIComponent(l.title)}'));window.location.href='test.html?id=${l.id}'">🧠 Test Yourself</button>
         </div>`).join('');
     }
   }
@@ -276,6 +276,11 @@
     document.getElementById('pdf-frame').src='about:blank';
     document.body.style.overflow='';
   }
+
+  // ── Expose functions to global scope (required for inline onclick attributes in module scripts) ──
+  window.markLecViewed = markLecViewed;
+  window.closePDF = closePDF;
+
   document.querySelectorAll('.pill').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
