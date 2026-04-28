@@ -122,7 +122,7 @@
     <div class="login-h">Admin Panel</div>
     <div class="login-sub">Plura Medical · Restricted Access</div>
     <input class="login-input" type="password" id="pwd-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')tryLogin()">
-    <button class="btn-login" onclick="tryLogin()">Login →</button>
+    <button class="btn-login" id="login-btn" onclick="tryLogin()">Login →</button>
     <div class="login-err" id="login-err">Wrong password. Try again.</div>
   </div>
 </div>
@@ -302,44 +302,64 @@
 
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const __db = getFirestore(initializeApp({
+  const __cfg = {
     apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
     authDomain:"plura-medical.firebaseapp.com",
     projectId:"plura-medical",
     storageBucket:"plura-medical.firebasestorage.app",
     messagingSenderId:"551828313411",
     appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
-  }));
+  };
+  const __app  = getApps().length ? getApps()[0] : initializeApp(__cfg);
+  const __auth = getAuth(__app);
+  const __db   = getFirestore(__app);
 
-  const ADMIN_PASSWORD = 'plura2025';
+  const ADMIN_EMAIL = 'pluraeditors@plura.admin';
   let selectedAnswer = -1;
 
   // ── AUTH ──────────────────────────────────────────────────────────────────
-  window.tryLogin = function() {
-    const pwd = document.getElementById('pwd-input').value;
-    if (pwd === ADMIN_PASSWORD) {
+  // Check auth state on load
+  onAuthStateChanged(__auth, user => {
+    if (user && user.email === ADMIN_EMAIL) {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-main').style.display = 'block';
-      sessionStorage.setItem('plura_admin', '1');
       loadAll();
     } else {
-      document.getElementById('login-err').style.display = 'block';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('admin-main').style.display = 'none';
+    }
+  });
+
+  window.tryLogin = async function() {
+    const pwd = document.getElementById('pwd-input').value.trim();
+    const btn = document.getElementById('login-btn');
+    const err = document.getElementById('login-err');
+    err.style.display = 'none';
+    if (!pwd) return;
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      const cred = await signInWithEmailAndPassword(__auth, ADMIN_EMAIL, pwd);
+      if (cred.user.email !== ADMIN_EMAIL) {
+        await signOut(__auth);
+        throw new Error('Not admin');
+      }
+      // onAuthStateChanged handles the rest
+    } catch(e) {
+      err.style.display = 'block';
       document.getElementById('pwd-input').value = '';
+      btn.disabled = false;
+      btn.textContent = 'Enter';
     }
   };
 
   window.logout = function() {
-    sessionStorage.removeItem('plura_admin');
-    location.reload();
+    signOut(__auth).then(() => location.reload());
   };
-
-  if (sessionStorage.getItem('plura_admin') === '1') {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-main').style.display = 'block';
-  }
 
   // ── TABS ──────────────────────────────────────────────────────────────────
   window.switchTab = function(name) {
@@ -551,7 +571,7 @@
     await Promise.all([loadLectures(), loadQuestions(), loadFlashcards()]);
   }
 
-  if (sessionStorage.getItem('plura_admin') === '1') loadAll();
+  // loadAll() is now called by onAuthStateChanged when admin is authenticated
 </script>
 </body>
 </html>
