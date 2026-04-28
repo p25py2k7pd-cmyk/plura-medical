@@ -115,7 +115,7 @@
     <li><a href="index.html">Home</a></li>
     <li><a href="lectures.html" class="active">Lectures</a></li>
     <li><a href="exams.html">Exams</a></li>
-    <li><a href="flashcards.html">Flashcards</a></li>
+    <li><a href="flashcards-1.html">Flashcards</a></li>
     <li><a href="schedule.html">Schedule</a></li>
   </ul>
   <a href="admin.html" class="nav-cta">Admin ⚡</a>
@@ -155,16 +155,69 @@
   </div>
 </div>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  const __db = getFirestore(initializeApp({
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  const __cfg = {
     apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
     authDomain:"plura-medical.firebaseapp.com",
     projectId:"plura-medical",
     storageBucket:"plura-medical.firebasestorage.app",
     messagingSenderId:"551828313411",
     appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
-  }));
+  };
+  const __app  = getApps().length ? getApps()[0] : initializeApp(__cfg);
+  const __auth = getAuth(__app);
+  const __db   = getFirestore(__app);
+
+  // ── AUTH GUARD ────────────────────────────────────────────────────────
+  const __overlay = document.createElement('div');
+  __overlay.style.cssText = 'position:fixed;inset:0;background:#f7f5ff;display:flex;align-items:center;justify-content:center;z-index:9999';
+  __overlay.innerHTML = '<div style="width:36px;height:36px;border:3px solid rgba(91,57,243,.15);border-top-color:#5b39f3;border-radius:50%;animation:spin .8s linear infinite"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  document.body.prepend(__overlay);
+  let __currentUser = null;
+
+  onAuthStateChanged(__auth, async user => {
+    if (!user) { window.location.replace('login.html'); return; }
+    __currentUser = user;
+    __overlay.remove();
+    try {
+      const usnap = await getDoc(doc(__db, 'users', user.uid));
+      const name  = usnap.exists() ? (usnap.data().name || 'Student') : 'Student';
+      injectUserNav(name);
+    } catch(e) { injectUserNav('Student'); }
+    init();
+  });
+
+  function injectUserNav(name) {
+    const ctaEl = document.querySelector('.nav-cta');
+    if (!ctaEl) return;
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;align-items:center;gap:10px';
+    wrapper.innerHTML = `
+      <a href="progress.html" style="display:flex;align-items:center;gap:6px;background:rgba(91,57,243,.1);border:1px solid rgba(91,57,243,.2);color:#5b39f3;padding:8px 14px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;">
+        📊 My Progress
+      </a>
+      <div style="position:relative">
+        <button id="user-menu-btn" style="display:flex;align-items:center;gap:7px;background:#5b39f3;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+          👤 ${name.split(' ')[0]} ▾
+        </button>
+        <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100%+6px);background:#fff;border:1px solid rgba(91,57,243,.12);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,45,.1);z-index:200">
+          <a href="admin.html" style="display:block;padding:8px 12px;font-size:12px;font-weight:600;color:#00002d;border-radius:6px;text-decoration:none;opacity:.7">⚡ Admin Panel</a>
+          <div style="height:1px;background:rgba(91,57,243,.1);margin:4px 0"></div>
+          <button id="logout-btn" style="width:100%;text-align:left;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#dc2626;background:transparent;border:none;border-radius:6px;cursor:pointer;">🚪 Sign Out</button>
+        </div>
+      </div>`;
+    ctaEl.replaceWith(wrapper);
+    document.getElementById('user-menu-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      const m = document.getElementById('user-menu');
+      m.style.display = m.style.display === 'none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', () => { const m = document.getElementById('user-menu'); if(m) m.style.display='none'; });
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(__auth).then(() => window.location.replace('login.html')));
+  }
+
   let __allData = [];
 
   async function init() {
@@ -190,17 +243,33 @@
     else{
       empty.style.display='none';grid.style.display='grid';
       grid.innerHTML=filtered.map(l=>`
-        <div class="lec-card" onclick="openPDF('${encodeURIComponent(l.pdfUrl)}','${encodeURIComponent(l.title)}')">
+        <div class="lec-card" onclick="openPDF('${encodeURIComponent(l.pdfUrl)}','${encodeURIComponent(l.title)}','${l.id}','${l.subject}')">
           <div class="lec-top"><span class="sbadge s-${l.subject}">${l.subject==='HD'?'H&D':l.subject}</span><span class="lec-date">${l.date}</span></div>
           <div class="lec-title">${l.title}</div>
           <div class="lec-desc">${l.description||'Click to open PDF'}</div>
           <span class="lec-open"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="1.5" stroke="#5b39f3" stroke-width="1.2"/><path d="M3.5 6h5M6 3.5v5" stroke="#5b39f3" stroke-width="1.2" stroke-linecap="round"/></svg>Open PDF</span>
-          <button class="test-btn" onclick="event.stopPropagation();window.open('test.html?id=${l.id}','_blank')">🧠 Test Yourself</button>
+          <button class="test-btn" onclick="event.stopPropagation();markLecViewed('${l.id}','${l.subject}',decodeURIComponent('${encodeURIComponent(l.title)}'));window.open('test.html?id=${l.id}','_blank')">🧠 Test Yourself</button>
         </div>`).join('');
     }
   }
-  function openPDF(urlEnc,titleEnc){
+  function openPDF(urlEnc,titleEnc,lectureId,subject){
     window.open(decodeURIComponent(urlEnc),'_blank');
+    // Track lecture viewed
+    if(__currentUser && lectureId) {
+      const pRef = doc(__db,'progress',__currentUser.uid);
+      updateDoc(pRef, {
+        [`lecturesDone.${lectureId}`]: {subject,title:decodeURIComponent(titleEnc),date:new Date().toISOString()},
+        updatedAt: new Date().toISOString()
+      }).catch(()=>{});
+    }
+  }
+  function markLecViewed(lectureId,subject,title){
+    if(__currentUser && lectureId) {
+      updateDoc(doc(__db,'progress',__currentUser.uid), {
+        [`lecturesDone.${lectureId}`]: {subject,title,date:new Date().toISOString()},
+        updatedAt: new Date().toISOString()
+      }).catch(()=>{});
+    }
   }
   function closePDF(){
     document.getElementById('pdf-modal').classList.remove('open');
@@ -215,7 +284,6 @@
   });
   document.getElementById('pdf-modal').addEventListener('click',e=>{if(e.target.id==='pdf-modal')closePDF();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closePDF();});
-  init();
 </script>
 </body>
 </html>

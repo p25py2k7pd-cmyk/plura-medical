@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Schedule — Plura Medical</title>
+  <title>Flashcards — Plura Medical</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,900;1,700&display=swap" rel="stylesheet">
   <style>
     @font-face {
@@ -31,207 +31,84 @@
     .nav-cta{background:var(--purple);color:var(--bg);padding:9px 22px;border-radius:7px;font-size:12px;font-weight:700;transition:all .2s;}
     .nav-cta:hover{background:var(--navy);}
 
-    /* LAYOUT */
-    .page-hero{padding:44px 48px 20px;}
+    /* HERO */
+    .page-hero{padding:44px 48px 20px;display:flex;align-items:flex-end;justify-content:space-between;}
     .page-hero h1{font-size:38px;font-weight:900;font-style:italic;letter-spacing:-1.5px;}
     .page-hero-sub{font-size:12px;color:var(--muted);margin-top:4px;}
 
-    /* MAIN GRID */
-    .main-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;padding:28px 48px 64px;}
+    /* FILTER */
+    .filter-bar{padding:0 48px 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .pill{padding:7px 18px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--navy);cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;}
+    .pill:hover,.pill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .card-count{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);}
 
-    /* TODAY CARD */
-    .today-card{background:var(--navy);border-radius:16px;padding:28px 28px;margin-bottom:20px;}
-    .today-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-    .today-date{font-size:24px;font-weight:900;font-style:italic;color:#fff;letter-spacing:-1px;margin-bottom:20px;}
-    .today-tasks{display:flex;flex-direction:column;gap:8px;}
-    .task-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;transition:all .2s;}
-    .task-item:hover{background:rgba(255,255,255,.1);}
-    .task-check{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-    .task-item.done .task-check{background:var(--purple);border-color:var(--purple);}
-    .task-text{font-size:13px;font-weight:600;color:#fff;flex:1;}
-    .task-item.done .task-text{opacity:.5;text-decoration:line-through;}
-    .task-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);}
-    .add-task-row{display:flex;gap:8px;margin-top:12px;}
-    .add-task-input{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Poppins',sans-serif;font-size:13px;outline:none;}
-    .add-task-input::placeholder{color:rgba(255,255,255,.3);}
-    .add-task-input:focus{border-color:var(--purple);}
-    .btn-add-task{background:var(--purple);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;white-space:nowrap;}
-    .btn-add-task:hover{background:#4a2de0;}
+    /* STUDY MODE */
+    .study-section{padding:0 48px 48px;display:flex;flex-direction:column;align-items:center;}
+    .flip-wrap{perspective:1200px;width:560px;max-width:100%;height:320px;margin-bottom:28px;cursor:pointer;}
+    .flip-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1);}
+    .flip-card.flipped{transform:rotateY(180deg);}
+    .flip-front,.flip-back{position:absolute;inset:0;border-radius:20px;padding:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+    .flip-front{background:var(--white);border:1px solid var(--border);box-shadow:0 8px 32px rgba(91,57,243,.08);}
+    .flip-back{background:var(--navy);transform:rotateY(180deg);}
+    .flip-hint{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;opacity:.4;}
+    .flip-front .flip-hint{color:var(--purple);}
+    .flip-back .flip-hint{color:rgba(255,255,255,.5);}
+    .flip-badge{font-size:9px;font-weight:800;padding:4px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:12px;}
+    .flip-q{font-size:20px;font-weight:700;line-height:1.4;color:var(--navy);}
+    .flip-a{font-size:16px;font-weight:600;line-height:1.5;color:#fff;}
 
-    /* WEEKLY CALENDAR */
-    .week-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
-    .week-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-    .week-title{font-size:14px;font-weight:700;}
-    .week-nav{display:flex;gap:6px;}
-    .btn-wk{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;transition:all .2s;}
-    .btn-wk:hover{border-color:var(--purple);color:var(--purple);}
-    .days-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-    .day-cell{text-align:center;padding:10px 4px;border-radius:10px;cursor:pointer;transition:all .2s;border:1px solid transparent;}
-    .day-cell:hover{border-color:var(--border);}
-    .day-cell.today{background:var(--purple);color:#fff;}
-    .day-cell.has-tasks{border-color:rgba(91,57,243,.3);}
-    .day-name{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;opacity:.5;margin-bottom:6px;}
-    .day-num{font-size:16px;font-weight:700;}
-    .day-dot{width:5px;height:5px;background:var(--purple);border-radius:50%;margin:4px auto 0;}
-    .day-cell.today .day-dot{background:#fff;}
+    /* NAV CONTROLS */
+    .fc-controls{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    .btn-fc{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;transition:all .2s;}
+    .btn-fc:hover{border-color:var(--purple);color:var(--purple);}
+    .btn-fc:disabled{opacity:.3;cursor:not-allowed;}
+    .fc-progress{font-size:13px;font-weight:700;min-width:80px;text-align:center;}
+    .fc-kb{font-size:11px;color:var(--muted);text-align:center;}
 
-    /* PROGRESS */
-    .progress-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;}
-    .progress-title{font-size:14px;font-weight:700;margin-bottom:18px;}
-    .subject-progress{margin-bottom:16px;}
-    .subj-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-    .subj-name{font-size:12px;font-weight:600;}
-    .subj-pct{font-size:11px;font-weight:700;color:var(--purple);}
-    .progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
-    .progress-fill{height:100%;background:var(--purple);border-radius:3px;transition:width .6s ease;}
+    /* KNOW/DONT BUTTONS */
+    .know-bar{display:flex;gap:12px;margin-bottom:36px;}
+    .btn-know{padding:11px 28px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;}
+    .btn-know.yes{background:#d1fae5;color:#064e3b;}
+    .btn-know.yes:hover{background:#10b981;color:#fff;}
+    .btn-know.no{background:#fee2e2;color:#7f1d1d;}
+    .btn-know.no:hover{background:#ef4444;color:#fff;}
 
-    /* STATS SIDEBAR */
-    .sidebar{}
-    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;}
-    .stat-card-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
-    .big-stat{font-size:40px;font-weight:900;color:var(--purple);letter-spacing:-2px;line-height:1;}
-    .big-stat-label{font-size:11px;color:var(--muted);margin-top:4px;}
-    .streak-fire{font-size:28px;}
-    .mini-stats{display:flex;flex-direction:column;gap:10px;}
-    .mini-stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
-    .mini-stat:last-child{border-bottom:none;}
-    .mini-label{font-size:12px;font-weight:500;}
-    .mini-val{font-size:14px;font-weight:700;color:var(--purple);}
+    /* STATS */
+    .fc-stats{display:flex;gap:24px;}
+    .fc-stat{text-align:center;}
+    .fc-stat-n{font-size:22px;font-weight:900;letter-spacing:-1px;}
+    .fc-stat-l{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;}
 
+    /* GRID VIEW */
+    .divider{padding:0 48px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+    .divider-line{flex:1;height:1px;background:var(--border);}
+    .divider-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+    .fc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 48px 64px;}
+    .fc-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .25s;}
+    .fc-card:hover{border-color:var(--purple);transform:translateY(-3px);box-shadow:0 10px 28px rgba(91,57,243,.09);}
+    .fc-card-q{font-size:13px;font-weight:600;margin-bottom:10px;line-height:1.4;}
+    .fc-card-a{font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;line-height:1.5;}
+    .fc-card-badge{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 
-    /* ─── POMODORO ─────────────────────────────────── */
-    .pomo-section { padding: 0 48px 48px; }
-    .pomo-card {
-      background: var(--navy);
-      border-radius: 18px;
-      padding: 36px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      align-items: center;
-    }
+    .sbadge{font-size:9px;font-weight:800;padding:4px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.3px;}
+    .s-MGD{background:rgba(91,57,243,.1);color:var(--purple);}
+    .s-Metabolism{background:rgba(0,0,45,.07);color:var(--navy);}
+    .s-TOB{background:rgba(162,143,249,.18);color:#6b4df0;}
+    .s-HD{background:rgba(91,57,243,.06);color:#8b73f5;}
 
-    /* Left: Timer */
-    .pomo-left { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    /* EMPTY */
+    .empty-state{text-align:center;padding:60px 48px;}
+    .empty-icon{font-size:52px;margin-bottom:16px;}
+    .empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+    .empty-state p{font-size:13px;color:var(--muted);margin-bottom:24px;}
+    .empty-state a{display:inline-block;background:var(--purple);color:#fff;padding:11px 24px;border-radius:8px;font-size:13px;font-weight:700;}
 
-    .pomo-label {
-      font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1.2px;
-      color: rgba(255,255,255,.4);
-    }
-
-    /* Clock ring */
-    .pomo-ring-wrap { position: relative; width: 180px; height: 180px; }
-    .pomo-svg { transform: rotate(-90deg); }
-    .pomo-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 8; }
-    .pomo-fill  { fill: none; stroke: var(--purple); stroke-width: 8;
-                  stroke-linecap: round; transition: stroke-dashoffset .9s linear;
-                  stroke-dasharray: 502; stroke-dashoffset: 0; }
-    .pomo-fill.break { stroke: #10b981; }
-    .pomo-time {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-    }
-    .pomo-digits {
-      font-size: 38px; font-weight: 900;
-      font-style: italic; letter-spacing: -2px;
-      color: #fff; line-height: 1;
-    }
-    .pomo-mode-label {
-      font-size: 10px; font-weight: 600;
-      color: rgba(255,255,255,.45);
-      text-transform: uppercase; letter-spacing: .8px;
-      margin-top: 4px;
-    }
-
-    /* Controls */
-    .pomo-controls { display: flex; gap: 10px; }
-    .btn-pomo {
-      padding: 10px 22px; border-radius: 8px;
-      font-size: 13px; font-weight: 700;
-      border: none; cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      transition: all .2s;
-    }
-    .btn-pomo.primary { background: var(--purple); color: #fff; }
-    .btn-pomo.primary:hover { background: #4a2de0; }
-    .btn-pomo.ghost {
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.7);
-    }
-    .btn-pomo.ghost:hover { background: rgba(255,255,255,.14); }
-
-    /* Session count */
-    .pomo-sessions { display: flex; gap: 6px; align-items: center; }
-    .pomo-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: rgba(255,255,255,.2);
-      transition: background .3s;
-    }
-    .pomo-dot.done { background: var(--purple); }
-    .pomo-sessions-label {
-      font-size: 10px; color: rgba(255,255,255,.4);
-      font-weight: 600; text-transform: uppercase;
-      letter-spacing: .5px; margin-left: 4px;
-    }
-
-    /* Right: Settings + Stats */
-    .pomo-right { display: flex; flex-direction: column; gap: 20px; }
-
-    .pomo-settings {
-      background: rgba(255,255,255,.05);
-      border-radius: 12px; padding: 20px;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    .pomo-settings-title {
-      font-size: 11px; font-weight: 700;
-      color: rgba(255,255,255,.4);
-      text-transform: uppercase; letter-spacing: .8px;
-    }
-    .pomo-row { display: flex; align-items: center; justify-content: space-between; }
-    .pomo-row-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75); }
-    .pomo-slider-wrap { display: flex; align-items: center; gap: 10px; }
-    .pomo-val {
-      font-size: 15px; font-weight: 800;
-      color: var(--purple); min-width: 28px; text-align: right;
-    }
-    .pomo-slider {
-      -webkit-appearance: none; appearance: none;
-      width: 120px; height: 4px;
-      background: rgba(255,255,255,.15);
-      border-radius: 2px; outline: none; cursor: pointer;
-    }
-    .pomo-slider::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%; background: var(--purple); cursor: pointer;
-    }
-
-    /* Today stats */
-    .pomo-stats {
-      display: flex; gap: 16px;
-    }
-    .pomo-stat {
-      flex: 1; background: rgba(255,255,255,.05);
-      border-radius: 10px; padding: 14px 16px;
-      text-align: center;
-    }
-    .pomo-stat-n { font-size: 24px; font-weight: 900; color: var(--purple); letter-spacing:-1px; }
-    .pomo-stat-l { font-size: 9px; font-weight: 700; color: rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
-
-    @media(max-width:900px) { .pomo-card { grid-template-columns: 1fr; } }
-    @media(max-width:640px) {
-      .pomo-section { padding: 0 20px 48px; }
-      .pomo-ring-wrap { width: 160px; height: 160px; }
-      .pomo-digits { font-size: 32px; }
-    }
-
-    @media(max-width:1024px){.main-grid{grid-template-columns:1fr;}}
+    @media(max-width:900px){.fc-grid{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:640px){
       .navbar{padding:14px 20px;}.nav-links{display:none;}
-      .page-hero,.main-grid{padding-left:20px;padding-right:20px;}
-      .main-grid{padding-bottom:48px;}
+      .page-hero,.filter-bar,.study-section,.divider,.fc-grid{padding-left:20px;padding-right:20px;}
+      .flip-wrap{height:260px;}
+      .fc-grid{grid-template-columns:1fr;padding-bottom:48px;}
     }
   </style>
 </head>
@@ -266,291 +143,77 @@
     <li><a href="index.html">Home</a></li>
     <li><a href="lectures.html">Lectures</a></li>
     <li><a href="exams.html">Exams</a></li>
-    <li><a href="flashcards-1.html">Flashcards</a></li>
-    <li><a href="schedule.html" class="active">Schedule</a></li>
+    <li><a href="flashcards-1.html" class="active">Flashcards</a></li>
+    <li><a href="schedule.html">Schedule</a></li>
   </ul>
   <a href="admin.html" class="nav-cta">Admin ⚡</a>
 </nav>
 
 <div class="page-hero">
-  <h1>Schedule</h1>
-  <p class="page-hero-sub">Track your daily study tasks and progress</p>
+  <div>
+    <h1>Flashcards</h1>
+    <p class="page-hero-sub">Flip to reveal — track what you know</p>
+  </div>
+  <span class="card-count" id="card-count-top">0 cards</span>
 </div>
 
-<div class="main-grid">
-  <div class="left-col">
+<div class="filter-bar">
+  <button class="pill active" data-filter="all">All</button>
+  <button class="pill" data-filter="MGD">MGD</button>
+  <button class="pill" data-filter="Metabolism">Metabolism</button>
+  <button class="pill" data-filter="TOB">TOB</button>
+  <button class="pill" data-filter="HD">H&amp;D</button>
+</div>
 
-    <!-- TODAY -->
-    <div class="today-card">
-      <div class="today-label">Today</div>
-      <div class="today-date" id="today-date">Loading...</div>
-      <div class="today-tasks" id="today-tasks"></div>
-      <div class="add-task-row">
-        <input class="add-task-input" id="task-input" placeholder="Add a study task..." onkeydown="if(event.key==='Enter')addTask()">
-        <select id="task-subject" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 12px;color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;outline:none;cursor:pointer;">
-          <option value="MGD" style="color:#000">MGD</option>
-          <option value="Metabolism" style="color:#000">Metabolism</option>
-          <option value="TOB" style="color:#000">TOB</option>
-          <option value="HD" style="color:#000">H&D</option>
-          <option value="General" style="color:#000">General</option>
-        </select>
-        <button class="btn-add-task" onclick="addTask()">+ Add</button>
+<!-- STUDY MODE -->
+<div class="study-section" id="study-section">
+  <div class="flip-wrap" onclick="flipCard()" id="flip-wrap">
+    <div class="flip-card" id="flip-card">
+      <div class="flip-front">
+        <div class="flip-hint">Tap to flip</div>
+        <span class="sbadge s-MGD flip-badge" id="flip-badge">MGD</span>
+        <div class="flip-q" id="flip-q">Loading...</div>
+      </div>
+      <div class="flip-back">
+        <div class="flip-hint">Answer</div>
+        <div class="flip-a" id="flip-a"></div>
       </div>
     </div>
-
-    <!-- WEEKLY CALENDAR -->
-    <div class="week-card">
-      <div class="week-hdr">
-        <span class="week-title" id="week-label">This Week</span>
-        <div class="week-nav">
-          <button class="btn-wk" onclick="changeWeek(-1)">←</button>
-          <button class="btn-wk" onclick="changeWeek(1)">→</button>
-        </div>
-      </div>
-      <div class="days-row" id="days-row"></div>
-    </div>
-
-    <!-- SUBJECT PROGRESS -->
-    <div class="progress-card">
-      <div class="progress-title">Subject Progress</div>
-      <div id="subj-progress"></div>
-    </div>
-
   </div>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="stat-card">
-      <div class="stat-card-title">Study Streak</div>
-      <div class="streak-fire">🔥</div>
-      <div class="big-stat" id="streak-num">0</div>
-      <div class="big-stat-label">days in a row</div>
-    </div>
+  <div class="fc-controls">
+    <button class="btn-fc" id="btn-prev" onclick="prevCard()">←</button>
+    <div class="fc-progress" id="fc-progress">1 / 1</div>
+    <button class="btn-fc" id="btn-next-fc" onclick="nextCard()">→</button>
+  </div>
 
-    <div class="stat-card">
-      <div class="stat-card-title">Quick Stats</div>
-      <div class="mini-stats">
-        <div class="mini-stat"><span class="mini-label">Tasks Today</span><span class="mini-val" id="ms-today">0</span></div>
-        <div class="mini-stat"><span class="mini-label">Completed</span><span class="mini-val" id="ms-done">0</span></div>
-        <div class="mini-stat"><span class="mini-label">Lectures</span><span class="mini-val" id="ms-lec">0</span></div>
-        <div class="mini-stat"><span class="mini-label">Flashcards</span><span class="mini-val" id="ms-flash">0</span></div>
-        <div class="mini-stat"><span class="mini-label">MCQs</span><span class="mini-val" id="ms-mcq">0</span></div>
-      </div>
-    </div>
+  <div class="know-bar">
+    <button class="btn-know no" onclick="markCard(false)">✗ Still Learning</button>
+    <button class="btn-know yes" onclick="markCard(true)">✓ Got It!</button>
+  </div>
+
+  <div class="fc-stats">
+    <div class="fc-stat"><div class="fc-stat-n" style="color:#10b981" id="stat-know">0</div><div class="fc-stat-l">Know It</div></div>
+    <div class="fc-stat"><div class="fc-stat-n" style="color:var(--muted)" id="stat-total">0</div><div class="fc-stat-l">Total</div></div>
+    <div class="fc-stat"><div class="fc-stat-n" style="color:#ef4444" id="stat-learn">0</div><div class="fc-stat-l">Learning</div></div>
   </div>
 </div>
 
+<div class="divider"><div class="divider-line"></div><div class="divider-label">All Cards</div><div class="divider-line"></div></div>
 
-
-<!-- ── POMODORO ──────────────────────────────── -->
-<section class="pomo-section">
-  <div class="pomo-card">
-
-    <!-- TIMER -->
-    <div class="pomo-left">
-      <div class="pomo-label">Pomodoro Timer</div>
-
-      <div class="pomo-ring-wrap">
-        <svg class="pomo-svg" width="180" height="180" viewBox="0 0 180 180">
-          <circle class="pomo-track" cx="90" cy="90" r="80"/>
-          <circle class="pomo-fill" id="pomo-ring" cx="90" cy="90" r="80"/>
-        </svg>
-        <div class="pomo-time">
-          <div class="pomo-digits" id="pomo-digits">25:00</div>
-          <div class="pomo-mode-label" id="pomo-mode-label">Focus</div>
-        </div>
-      </div>
-
-      <div class="pomo-controls">
-        <button class="btn-pomo primary" id="btn-pomo-start" onclick="pomoToggle()">▶ Start</button>
-        <button class="btn-pomo ghost" onclick="pomoReset()">↺ Reset</button>
-      </div>
-
-      <div class="pomo-sessions">
-        <div class="pomo-dot" id="pd-0"></div>
-        <div class="pomo-dot" id="pd-1"></div>
-        <div class="pomo-dot" id="pd-2"></div>
-        <div class="pomo-dot" id="pd-3"></div>
-        <span class="pomo-sessions-label">Sessions</span>
-      </div>
-    </div>
-
-    <!-- SETTINGS + STATS -->
-    <div class="pomo-right">
-
-      <div class="pomo-settings">
-        <div class="pomo-settings-title">⚙️ Customize</div>
-
-        <div class="pomo-row">
-          <span class="pomo-row-label">Focus time</span>
-          <div class="pomo-slider-wrap">
-            <input type="range" class="pomo-slider" id="sl-focus" min="5" max="60" value="25"
-              oninput="pomoUpdateSettings()">
-            <span class="pomo-val" id="val-focus">25</span>
-            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
-          </div>
-        </div>
-
-        <div class="pomo-row">
-          <span class="pomo-row-label">Short break</span>
-          <div class="pomo-slider-wrap">
-            <input type="range" class="pomo-slider" id="sl-break" min="1" max="30" value="5"
-              oninput="pomoUpdateSettings()">
-            <span class="pomo-val" id="val-break">5</span>
-            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
-          </div>
-        </div>
-
-        <div class="pomo-row">
-          <span class="pomo-row-label">Long break</span>
-          <div class="pomo-slider-wrap">
-            <input type="range" class="pomo-slider" id="sl-long" min="5" max="60" value="15"
-              oninput="pomoUpdateSettings()">
-            <span class="pomo-val" id="val-long">15</span>
-            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">min</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="pomo-stats">
-        <div class="pomo-stat">
-          <div class="pomo-stat-n" id="pomo-stat-sessions">0</div>
-          <div class="pomo-stat-l">Sessions Today</div>
-        </div>
-        <div class="pomo-stat">
-          <div class="pomo-stat-n" id="pomo-stat-mins">0</div>
-          <div class="pomo-stat-l">Minutes Focused</div>
-        </div>
-        <div class="pomo-stat">
-          <div class="pomo-stat-n" id="pomo-stat-streak">0</div>
-          <div class="pomo-stat-l">Day Streak 🔥</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-
-
-<script>
-
-const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-let weekOffset = 0;
-const today    = new Date();
-const todayKey = today.toISOString().split('T')[0];
-const getTasks  = () => JSON.parse(localStorage.getItem('plura_tasks') || '{}');
-const saveTasks = t  => localStorage.setItem('plura_tasks', JSON.stringify(t));
-
-function addTask() {
-  const inp  = document.getElementById('task-input');
-  const subj = document.getElementById('task-subject').value;
-  const text = inp.value.trim();
-  if (!text) return;
-  const all = getTasks();
-  if (!all[todayKey]) all[todayKey] = [];
-  all[todayKey].push({ text, subject: subj, done: false, id: Date.now() });
-  saveTasks(all);
-  inp.value = '';
-  render();
-}
-
-function toggleTask(id) {
-  const all = getTasks();
-  const tasks = all[todayKey] || [];
-  const t = tasks.find(t => t.id === id);
-  if (t) t.done = !t.done;
-  saveTasks(all);
-  updateStreak();
-  render();
-}
-
-function deleteTask(id) {
-  const all = getTasks();
-  if (all[todayKey]) all[todayKey] = all[todayKey].filter(t => t.id !== id);
-  saveTasks(all);
-  render();
-}
-
-function render() {
-  document.getElementById('today-date').textContent =
-    DAYS[today.getDay()] + ', ' + today.getDate() + ' ' + MONTHS[today.getMonth()] + ' ' + today.getFullYear();
-  const all   = getTasks();
-  const tasks = all[todayKey] || [];
-  const cont  = document.getElementById('today-tasks');
-  if (tasks.length === 0) {
-    cont.innerHTML = '<div style="color:rgba(255,255,255,.3);font-size:13px;padding:8px 0;">No tasks yet — add one below ↓</div>';
-  } else {
-    cont.innerHTML = tasks.map(t => `
-      <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
-        <div class="task-check">${t.done ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}</div>
-        <span class="task-text">${t.text}</span>
-        <span class="task-badge">${t.subject}</span>
-        <span onclick="event.stopPropagation();deleteTask(${t.id})" style="color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;padding:0 4px;">×</span>
-      </div>`).join('');
-  }
-  document.getElementById('ms-today').textContent = tasks.length;
-  document.getElementById('ms-done').textContent  = tasks.filter(t => t.done).length;
-  renderWeek();
-}
-
-function changeWeek(dir) { weekOffset += dir; renderWeek(); }
-
-function renderWeek() {
-  const start = new Date(today);
-  start.setDate(today.getDate() - today.getDay() + weekOffset * 7);
-  document.getElementById('week-label').textContent = 'Week of ' + start.getDate() + ' ' + MONTHS[start.getMonth()];
-  const all = getTasks();
-  document.getElementById('days-row').innerHTML = Array.from({length:7}, (_,i) => {
-    const d = new Date(start); d.setDate(start.getDate() + i);
-    const key = d.toISOString().split('T')[0];
-    const isT = key === todayKey;
-    const hasT = all[key] && all[key].length > 0;
-    return '<div class="day-cell ' + (isT?'today':'') + ' ' + (hasT?'has-tasks':'') + '">' +
-      '<div class="day-name">' + DAYS[d.getDay()] + '</div>' +
-      '<div class="day-num">' + d.getDate() + '</div>' +
-      (hasT ? '<div class="day-dot"></div>' : '') + '</div>';
-  }).join('');
-}
-
-function renderProgress(lecs) {
-  const subjects = ['MGD','Metabolism','TOB','HD'];
-  const cont = document.getElementById('subj-progress');
-  cont.innerHTML = subjects.map(s => {
-    const n = lecs.filter(l=>l.subject===s).length;
-    const pct = lecs.length ? Math.round((n/Math.max(lecs.length,4))*100) : 0;
-    return '<div class="subject-progress">' +
-      '<div class="subj-row"><span class="subj-name">' + (s==='HD'?'H&D':s) + '</span><span class="subj-pct">' + n + ' lectures</span></div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
-  }).join('');
-}
-
-function updateStreak() {
-  const all = getTasks();
-  let streak = 0;
-  const d = new Date(today);
-  while (true) {
-    const key = d.toISOString().split('T')[0];
-    if ((all[key]||[]).some(t => t.done)) { streak++; d.setDate(d.getDate()-1); }
-    else break;
-  }
-  document.getElementById('streak-num').textContent = streak;
-  localStorage.setItem('plura_streak', streak);
-}
-
-document.getElementById('streak-num').textContent = localStorage.getItem('plura_streak') || 0;
-render();
-
-</script>
+<div class="fc-grid" id="fc-grid"></div>
+<div class="empty-state" id="empty" style="display:none">
+  <div class="empty-icon">🃏</div>
+  <h3>No flashcards yet</h3>
+  <p>Add flashcards from the Admin panel to start studying.</p>
+  <a href="admin.html">Go to Admin ↗</a>
+</div>
 
 <script type="module">
-
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  const __cfg2 = {
+  const __cfg = {
     apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
     authDomain:"plura-medical.firebaseapp.com",
     projectId:"plura-medical",
@@ -558,28 +221,30 @@ render();
     messagingSenderId:"551828313411",
     appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
   };
-  const __app2  = getApps().length ? getApps()[0] : initializeApp(__cfg2);
-  const __auth2 = getAuth(__app2);
-  const db      = getFirestore(__app2);
+  const __app  = getApps().length ? getApps()[0] : initializeApp(__cfg);
+  const __auth = getAuth(__app);
+  const __db   = getFirestore(__app);
 
-  // Auth guard
-  const __ov2 = document.createElement('div');
-  __ov2.style.cssText = 'position:fixed;inset:0;background:#f7f5ff;display:flex;align-items:center;justify-content:center;z-index:9999';
-  __ov2.innerHTML = '<div style="width:36px;height:36px;border:3px solid rgba(91,57,243,.15);border-top-color:#5b39f3;border-radius:50%;animation:spin .8s linear infinite"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
-  document.body.prepend(__ov2);
+  // ── AUTH GUARD ────────────────────────────────────────────────────────
+  const __overlay = document.createElement('div');
+  __overlay.style.cssText = 'position:fixed;inset:0;background:#f7f5ff;display:flex;align-items:center;justify-content:center;z-index:9999';
+  __overlay.innerHTML = '<div style="width:36px;height:36px;border:3px solid rgba(91,57,243,.15);border-top-color:#5b39f3;border-radius:50%;animation:spin .8s linear infinite"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  document.body.prepend(__overlay);
+  let __currentUser = null;
 
-  onAuthStateChanged(__auth2, async user => {
+  onAuthStateChanged(__auth, async user => {
     if (!user) { window.location.replace('login.html'); return; }
-    __ov2.remove();
+    __currentUser = user;
+    __overlay.remove();
     try {
-      const usnap = await getDoc(doc(db, 'users', user.uid));
+      const usnap = await getDoc(doc(__db, 'users', user.uid));
       const name  = usnap.exists() ? (usnap.data().name || 'Student') : 'Student';
-      injectUserNav2(name);
-    } catch(e) { injectUserNav2('Student'); }
-    loadFirebaseStats();
+      injectUserNav(name);
+    } catch(e) { injectUserNav('Student'); }
+    init();
   });
 
-  function injectUserNav2(name) {
+  function injectUserNav(name) {
     const ctaEl = document.querySelector('.nav-cta');
     if (!ctaEl) return;
     const wrapper = document.createElement('div');
@@ -589,189 +254,139 @@ render();
         📊 My Progress
       </a>
       <div style="position:relative">
-        <button id="user-menu-btn2" style="display:flex;align-items:center;gap:7px;background:#5b39f3;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+        <button id="user-menu-btn" style="display:flex;align-items:center;gap:7px;background:#5b39f3;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
           👤 ${name.split(' ')[0]} ▾
         </button>
-        <div id="user-menu2" style="display:none;position:absolute;right:0;top:calc(100%+6px);background:#fff;border:1px solid rgba(91,57,243,.12);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,45,.1);z-index:200">
+        <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100%+6px);background:#fff;border:1px solid rgba(91,57,243,.12);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,45,.1);z-index:200">
           <a href="admin.html" style="display:block;padding:8px 12px;font-size:12px;font-weight:600;color:#00002d;border-radius:6px;text-decoration:none;opacity:.7">⚡ Admin Panel</a>
           <div style="height:1px;background:rgba(91,57,243,.1);margin:4px 0"></div>
-          <button id="logout-btn2" style="width:100%;text-align:left;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#dc2626;background:transparent;border:none;border-radius:6px;cursor:pointer;">🚪 Sign Out</button>
+          <button id="logout-btn" style="width:100%;text-align:left;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#dc2626;background:transparent;border:none;border-radius:6px;cursor:pointer;">🚪 Sign Out</button>
         </div>
       </div>`;
     ctaEl.replaceWith(wrapper);
-    document.getElementById('user-menu-btn2').addEventListener('click', e => {
+    document.getElementById('user-menu-btn').addEventListener('click', e => {
       e.stopPropagation();
-      const m = document.getElementById('user-menu2');
+      const m = document.getElementById('user-menu');
       m.style.display = m.style.display === 'none' ? 'block' : 'none';
     });
-    document.addEventListener('click', () => { const m = document.getElementById('user-menu2'); if(m) m.style.display='none'; });
-    document.getElementById('logout-btn2').addEventListener('click', () => signOut(__auth2).then(() => window.location.replace('login.html')));
+    document.addEventListener('click', () => { const m = document.getElementById('user-menu'); if(m) m.style.display='none'; });
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(__auth).then(() => window.location.replace('login.html')));
   }
 
-  async function loadFirebaseStats() {
+  let __allData = [];
+
+  async function init() {
     try {
-      const [ls,qs,fs] = await Promise.all([
-        getDocs(query(collection(db,'lectures'),  orderBy('createdAt','desc'))),
-        getDocs(query(collection(db,'questions'), orderBy('createdAt','desc'))),
-        getDocs(query(collection(db,'flashcards'),orderBy('createdAt','desc')))
-      ]);
-      const lecs = ls.docs.map(d=>({id:d.id,...d.data()}));
-      document.getElementById('ms-lec').textContent   = lecs.length;
-      document.getElementById('ms-flash').textContent = fs.size;
-      document.getElementById('ms-mcq').textContent   = qs.size;
-      if (typeof renderProgress === 'function') renderProgress(lecs);
+      const snap = await getDocs(query(collection(__db,'flashcards'), orderBy('createdAt','desc')));
+      __allData = snap.docs.map(d => ({id:d.id,...d.data()}));
+      loadCards();
     } catch(e) { console.error('Firebase:', e); }
   }
-</script>
 
-<script>
 
-  // ── POMODORO LOGIC ──────────────────────────────────────────────
-  let pomoTimer = null;
-  let pomoSecondsLeft = 25 * 60;
-  let pomoTotalSeconds = 25 * 60;
-  let pomoRunning = false;
-  let pomoMode = 'focus'; // 'focus' | 'break' | 'long'
-  let pomoSessionCount = 0;
-  const CIRCUMFERENCE = 2 * Math.PI * 80; // 502.65
+  let activeFilter = 'all';
+  let cards = [], idx = 0, known = new Set();
+  let isFlipped = false;
 
-  const pomoTodayKey = 'pomo_' + new Date().toISOString().split('T')[0];
-  let pomoStats = JSON.parse(localStorage.getItem(pomoTodayKey) || '{"sessions":0,"mins":0}');
+  const getCards = () => __allData;
 
-  function getFocusMins()  { return parseInt(document.getElementById('sl-focus').value); }
-  function getBreakMins()  { return parseInt(document.getElementById('sl-break').value); }
-  function getLongMins()   { return parseInt(document.getElementById('sl-long').value); }
-
-  function pomoUpdateSettings() {
-    document.getElementById('val-focus').textContent = getFocusMins();
-    document.getElementById('val-break').textContent = getBreakMins();
-    document.getElementById('val-long').textContent  = getLongMins();
-    if (!pomoRunning) pomoReset();
+  function loadCards() {
+    const all = getCards();
+    cards = all.filter(c => activeFilter === 'all' || c.subject === activeFilter);
+    idx = 0; known.clear(); isFlipped = false;
+    document.getElementById('flip-card').classList.remove('flipped');
+    document.getElementById('card-count-top').textContent = `${all.length} card${all.length !== 1 ? 's' : ''}`;
+    document.getElementById('stat-total').textContent = cards.length;
+    document.getElementById('stat-know').textContent = 0;
+    document.getElementById('stat-learn').textContent = 0;
+    renderStudy();
+    renderGrid();
   }
 
-  function pomoReset() {
-    clearInterval(pomoTimer);
-    pomoRunning = false;
-    pomoMode = 'focus';
-    pomoSecondsLeft = getFocusMins() * 60;
-    pomoTotalSeconds = pomoSecondsLeft;
-    document.getElementById('btn-pomo-start').textContent = '▶ Start';
-    pomoUpdateDisplay();
+  function renderStudy() {
+    const section = document.getElementById('study-section');
+    const empty = document.getElementById('empty');
+    if (cards.length === 0) { section.style.display = 'none'; empty.style.display = 'block'; return; }
+    section.style.display = 'flex'; empty.style.display = 'none';
+    const c = cards[idx];
+    document.getElementById('flip-q').textContent = c.front;
+    document.getElementById('flip-a').textContent = c.back;
+    document.getElementById('flip-badge').textContent = c.subject === 'HD' ? 'H&D' : c.subject;
+    document.getElementById('flip-badge').className = `sbadge s-${c.subject} flip-badge`;
+    document.getElementById('fc-progress').textContent = `${idx + 1} / ${cards.length}`;
+    document.getElementById('btn-prev').disabled = idx === 0;
+    document.getElementById('btn-next-fc').disabled = idx === cards.length - 1;
+    isFlipped = false;
+    document.getElementById('flip-card').classList.remove('flipped');
   }
 
-  function pomoToggle() {
-    if (pomoRunning) {
-      clearInterval(pomoTimer);
-      pomoRunning = false;
-      document.getElementById('btn-pomo-start').textContent = '▶ Resume';
-    } else {
-      pomoRunning = true;
-      document.getElementById('btn-pomo-start').textContent = '⏸ Pause';
-      pomoTimer = setInterval(() => {
-        pomoSecondsLeft--;
-        pomoUpdateDisplay();
-        if (pomoSecondsLeft <= 0) pomoNextPhase();
-      }, 1000);
-    }
+  function renderGrid() {
+    const grid = document.getElementById('fc-grid');
+    if (cards.length === 0) { grid.innerHTML = ''; return; }
+    grid.innerHTML = cards.map((c, i) => `
+      <div class="fc-card">
+        <div class="fc-card-badge">
+          <span class="sbadge s-${c.subject}">${c.subject === 'HD' ? 'H&D' : c.subject}</span>
+          ${known.has(i) ? '<span style="font-size:10px;color:#10b981;font-weight:700;">✓ Known</span>' : ''}
+        </div>
+        <div class="fc-card-q">${c.front}</div>
+        <div class="fc-card-a">${c.back}</div>
+      </div>
+    `).join('');
   }
 
-  function pomoNextPhase() {
-    clearInterval(pomoTimer);
-    pomoRunning = false;
-
-    if (pomoMode === 'focus') {
-      // Completed a focus session
-      pomoSessionCount++;
-      pomoStats.sessions++;
-      pomoStats.mins += getFocusMins();
-      localStorage.setItem(pomoTodayKey, JSON.stringify(pomoStats));
-      pomoUpdateStats();
-      pomoUpdateDots();
-
-      // Play soft bell
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.frequency.value = 880; o.type = 'sine';
-        g.gain.setValueAtTime(0.3, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-        o.start(); o.stop(ctx.currentTime + 1.2);
-      } catch(e) {}
-
-      // After 4 sessions = long break
-      if (pomoSessionCount % 4 === 0) {
-        pomoMode = 'long';
-        pomoSecondsLeft = getLongMins() * 60;
-      } else {
-        pomoMode = 'break';
-        pomoSecondsLeft = getBreakMins() * 60;
-      }
-    } else {
-      // Break done → back to focus
-      pomoMode = 'focus';
-      pomoSecondsLeft = getFocusMins() * 60;
-    }
-
-    pomoTotalSeconds = pomoSecondsLeft;
-    pomoUpdateDisplay();
-    document.getElementById('btn-pomo-start').textContent = '▶ Start';
-
-    // Show browser notification if allowed
-    if (Notification.permission === 'granted') {
-      new Notification('Plura Medical 🍅', {
-        body: pomoMode === 'focus' ? 'Break over! Time to focus 💪' : 'Session done! Take a break ☕',
-        icon: ''
-      });
-    }
+  function flipCard() {
+    isFlipped = !isFlipped;
+    document.getElementById('flip-card').classList.toggle('flipped', isFlipped);
   }
 
-  function pomoUpdateDisplay() {
-    const m = Math.floor(pomoSecondsLeft / 60).toString().padStart(2, '0');
-    const s = (pomoSecondsLeft % 60).toString().padStart(2, '0');
-    document.getElementById('pomo-digits').textContent = `${m}:${s}`;
+  function nextCard() { if (idx < cards.length - 1) { idx++; renderStudy(); } }
+  function prevCard() { if (idx > 0) { idx--; renderStudy(); } }
 
-    const modeLabels = { focus: 'Focus 🎯', break: 'Short Break ☕', long: 'Long Break 🌿' };
-    document.getElementById('pomo-mode-label').textContent = modeLabels[pomoMode];
-
-    // Ring progress
-    const progress = pomoSecondsLeft / pomoTotalSeconds;
-    const offset = CIRCUMFERENCE * (1 - progress);
-    const ring = document.getElementById('pomo-ring');
-    ring.style.strokeDashoffset = offset;
-    ring.style.strokeDasharray = CIRCUMFERENCE;
-    ring.classList.toggle('break', pomoMode !== 'focus');
-
-    // Page title
-    document.title = `${m}:${s} — Plura Medical`;
+  function markCard(yes) {
+    if (yes) known.add(idx); else known.delete(idx);
+    document.getElementById('stat-know').textContent = known.size;
+    document.getElementById('stat-learn').textContent = cards.length - known.size;
+    renderGrid();
+    if (idx < cards.length - 1) { idx++; renderStudy(); }
   }
 
-  function pomoUpdateDots() {
-    for (let i = 0; i < 4; i++) {
-      const el = document.getElementById('pd-' + i);
-      if (el) el.classList.toggle('done', i < (pomoSessionCount % 5));
-    }
+  // Expose functions globally (needed for type="module")
+  window.flipCard = flipCard;
+  window.nextCard = nextCard;
+  window.prevCard = prevCard;
+  window.markCard = markCard;
+
+  // Touch support for flip
+  let touchStartX = 0, touchStartY = 0;
+  const flipEl = document.getElementById('flip-wrap');
+  if (flipEl) {
+    flipEl.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, {passive: true});
+    flipEl.addEventListener('touchend', e => {
+  flipCard();
+}, {passive: true});
   }
 
-  function pomoUpdateStats() {
-    document.getElementById('pomo-stat-sessions').textContent = pomoStats.sessions;
-    document.getElementById('pomo-stat-mins').textContent = pomoStats.mins;
-    document.getElementById('pomo-stat-streak').textContent =
-      localStorage.getItem('plura_streak') || 0;
-  }
+  document.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      loadCards();
+    });
+  });
 
-  // Request notification permission
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-
-  // Init
-  pomoUpdateDisplay();
-  pomoUpdateStats();
-  pomoUpdateDots();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') nextCard();
+    if (e.key === 'ArrowLeft') prevCard();
+    if (e.key === ' ') { e.preventDefault(); flipCard(); }
+    if (e.key === 'y') markCard(true);
+    if (e.key === 'n') markCard(false);
+  });
 
 </script>
-
 </body>
 </html>

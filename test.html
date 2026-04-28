@@ -129,7 +129,7 @@
     <li><a href="index.html">Home</a></li>
     <li><a href="lectures.html" class="active">Lectures</a></li>
     <li><a href="exams.html">Exams</a></li>
-    <li><a href="flashcards.html">Flashcards</a></li>
+    <li><a href="flashcards-1.html">Flashcards</a></li>
     <li><a href="schedule.html">Schedule</a></li>
   </ul>
   <a href="admin.html" class="nav-cta">Admin ⚡</a>
@@ -184,17 +184,37 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const __db = getFirestore(initializeApp({
+  const __cfg = {
     apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
     authDomain:"plura-medical.firebaseapp.com",
     projectId:"plura-medical",
     storageBucket:"plura-medical.firebasestorage.app",
     messagingSenderId:"551828313411",
     appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
-  }));
+  };
+  const __app  = getApps().length ? getApps()[0] : initializeApp(__cfg);
+  const __auth = getAuth(__app);
+  const __db   = getFirestore(__app);
+
+  // ── AUTH GUARD ────────────────────────────────────────────────────────
+  const __overlay = document.createElement('div');
+  __overlay.style.cssText = 'position:fixed;inset:0;background:#f7f5ff;display:flex;align-items:center;justify-content:center;z-index:9999';
+  __overlay.innerHTML = '<div style="width:36px;height:36px;border:3px solid rgba(91,57,243,.15);border-top-color:#5b39f3;border-radius:50%;animation:spin .8s linear infinite"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  document.body.prepend(__overlay);
+  let __currentUser = null;
+
+  onAuthStateChanged(__auth, async user => {
+    if (!user) { window.location.replace('login.html'); return; }
+    __currentUser = user;
+    __overlay.remove();
+    init();
+  });
+
+  async function init() {
 
   // ── READ LECTURE ID FROM URL ─────────────────────────────────────────────
   const params    = new URLSearchParams(window.location.search);
@@ -293,6 +313,18 @@
     answeredMap[qId] = chosen;
     if (chosen === correct) correctCount++;
     renderMCQ();
+    // Save progress
+    if (__currentUser && lectureId) {
+      const q = allQuestions.find(x => x.id === qId);
+      const subject = q ? q.subject : 'unknown';
+      const isCorrect = chosen === correct;
+      const pRef = doc(__db, 'progress', __currentUser.uid);
+      const field = `questionsAnswered.${qId}`;
+      updateDoc(pRef, {
+        [field]: { correct: isCorrect, subject, lectureId, date: new Date().toISOString() },
+        updatedAt: new Date().toISOString()
+      }).catch(() => {});
+    }
   };
 
   function updateScore() {
@@ -362,6 +394,7 @@
     loadMCQ();
     loadFlashcards();
   }
+  } // end init()
 </script>
 </body>
 </html>

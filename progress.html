@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Progress — Plura Medical</title>
+  <link rel="apple-touch-icon" href="plurasiteicon.png"/>
+  <link rel="icon" type="image/png" href="plurasiteicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--navy:#00002d;--purple:#5b39f3;--bg:#f7f5ff;--white:#fff;--border:rgba(91,57,243,.12);--muted:rgba(0,0,45,.45)}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--navy)}
+    a{text-decoration:none;color:inherit}
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(247,245,255,.92);backdrop-filter:blur(12px);z-index:100}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-wordmark{display:flex;flex-direction:column;line-height:1}
+    .logo-plura{font-size:20px;font-weight:900;font-style:italic;letter-spacing:-1px}
+    .logo-medical{font-size:8px;font-weight:600;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+    .logo-tm{font-size:8px;font-style:normal;font-weight:700;vertical-align:super;color:var(--purple);margin-left:2px}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-size:12px;font-weight:600;color:var(--navy);opacity:.45;transition:opacity .2s}
+    .nav-links a:hover{opacity:1}
+    .nav-links a.active{opacity:1;color:var(--purple)}
+    .nav-cta{background:var(--purple);color:var(--bg);padding:9px 22px;border-radius:7px;font-size:12px;font-weight:700}
+    @media(max-width:640px){.navbar{padding:14px 20px}.nav-links{display:none}}
+
+    .page-header{padding:40px 48px 20px;max-width:1100px;margin:0 auto}
+    .page-header h1{font-size:36px;font-weight:900;letter-spacing:-1px}
+    .page-header p{font-size:14px;color:var(--muted);margin-top:6px}
+    @media(max-width:640px){.page-header{padding:28px 20px 16px}}
+
+    main{max-width:1100px;margin:0 auto;padding:0 48px 60px}
+    @media(max-width:640px){main{padding:0 16px 40px}}
+
+    /* Overall stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:36px}
+    @media(max-width:640px){.stats-grid{grid-template-columns:1fr 1fr}}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+    .stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+    .stat-val{font-size:28px;font-weight:800;color:var(--navy);line-height:1}
+    .stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+    /* Subject cards */
+    .section-title{font-size:18px;font-weight:800;margin-bottom:16px}
+    .subjects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:36px}
+    @media(max-width:640px){.subjects-grid{grid-template-columns:1fr}}
+    .subj-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:22px}
+    .subj-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .subj-dot{width:10px;height:10px;border-radius:50%}
+    .subj-name{font-size:15px;font-weight:700}
+    .prog-bar-wrap{background:rgba(91,57,243,.08);border-radius:20px;height:8px;margin-bottom:12px;overflow:hidden}
+    .prog-bar{height:100%;border-radius:20px;background:var(--purple);transition:width .6s ease}
+    .subj-stats{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+    .subj-stats span{font-weight:600;color:var(--navy)}
+
+    /* Recent activity */
+    .activity-list{display:flex;flex-direction:column;gap:8px}
+    .activity-item{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;font-size:13px}
+    .act-icon{font-size:18px;flex-shrink:0}
+    .act-title{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .act-meta{font-size:11px;color:var(--muted);flex-shrink:0}
+    .act-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+
+    .empty-msg{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+    .loader{text-align:center;padding:60px;color:var(--muted)}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="logo">
+    <svg height="38" viewBox="0 0 40.93 47.71" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <polygon points="40.93 35.44 20.46 23.17 20.46 0 40.93 35.44" fill="#5b39f3"/>
+      <polygon points="40.93 35.44 0 35.44 20.46 0 20.46 23.17 40.93 35.44" fill="#ffffff"/>
+      <polygon points="40.93 35.44 0 35.44 20.46 23.17 40.93 35.44" fill="#00002d"/>
+      <polygon points="0 35.44 40.93 35.44 20.46 47.71 0 35.44" fill="#00002d"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-plura">plura<span class="logo-tm">TM</span></span>
+      <span class="logo-medical">medical</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="lectures.html">Lectures</a></li>
+    <li><a href="exams.html">Exams</a></li>
+    <li><a href="flashcards-1.html">Flashcards</a></li>
+    <li><a href="schedule.html">Schedule</a></li>
+  </ul>
+  <a href="admin.html" class="nav-cta" id="nav-cta-slot">Admin ⚡</a>
+</nav>
+
+<div class="page-header">
+  <h1 id="page-title">My Progress</h1>
+  <p id="page-sub">Loading your study data…</p>
+</div>
+
+<main>
+  <div id="loader" class="loader"><div class="spinner"></div></div>
+  <div id="content" style="display:none">
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Lectures Viewed</div>
+        <div class="stat-val" id="total-lec">—</div>
+        <div class="stat-sub">unique lectures opened</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Questions Answered</div>
+        <div class="stat-val" id="total-q">—</div>
+        <div class="stat-sub" id="q-acc">— accuracy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Overall Score</div>
+        <div class="stat-val" id="overall-score">—</div>
+        <div class="stat-sub">correct answers</div>
+      </div>
+    </div>
+
+    <div class="section-title">Progress by Subject</div>
+    <div class="subjects-grid" id="subjects-grid"></div>
+
+    <div class="section-title">Recent Activity</div>
+    <div class="activity-list" id="activity-list"></div>
+
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const __cfg = {
+    apiKey:"AIzaSyD9gopQ1xd-iOIwPFnfoOWapJ0ndT2ZIeE",
+    authDomain:"plura-medical.firebaseapp.com",
+    projectId:"plura-medical",
+    storageBucket:"plura-medical.firebasestorage.app",
+    messagingSenderId:"551828313411",
+    appId:"1:551828313411:web:fdea79d9d44f5c07a98bf6"
+  };
+  const __app  = getApps().length ? getApps()[0] : initializeApp(__cfg);
+  const __auth = getAuth(__app);
+  const __db   = getFirestore(__app);
+
+  const SUBJECTS = {
+    MGD:   { label:'MGD',         color:'#5b39f3' },
+    Metabolism: { label:'Metabolism', color:'#f59e0b' },
+    TOB:   { label:'TOB / Histology', color:'#10b981' },
+    HD:    { label:'Health & Disease', color:'#ef4444' },
+  };
+
+  onAuthStateChanged(__auth, async user => {
+    if (!user) { window.location.replace('login.html'); return; }
+
+    // Inject nav user info
+    try {
+      const usnap = await getDoc(doc(__db, 'users', user.uid));
+      const name  = usnap.exists() ? (usnap.data().name || 'Student') : 'Student';
+      document.getElementById('page-title').textContent = `${name.split(' ')[0]}'s Progress`;
+      document.getElementById('page-sub').textContent = `Your personal study stats across all subjects`;
+      injectUserNav(name);
+    } catch(e) {}
+
+    // Load progress and all lectures/questions for context
+    try {
+      const [progSnap, lecSnap, qSnap] = await Promise.all([
+        getDoc(doc(__db, 'progress', user.uid)),
+        getDocs(query(collection(__db, 'lectures'), orderBy('createdAt','desc'))),
+        getDocs(query(collection(__db, 'questions'), orderBy('createdAt','desc'))),
+      ]);
+
+      const prog      = progSnap.exists() ? progSnap.data() : {};
+      const allLecs   = lecSnap.docs.map(d=>({id:d.id,...d.data()}));
+      const allQs     = qSnap.docs.map(d=>({id:d.id,...d.data()}));
+      const lecsDone  = prog.lecturesDone  || {};
+      const qAnswered = prog.questionsAnswered || {};
+
+      // ── Overall stats ────────────────────────────────────────────────
+      const totalLecViewed  = Object.keys(lecsDone).length;
+      const totalQAnswered  = Object.keys(qAnswered).length;
+      const totalCorrect    = Object.values(qAnswered).filter(v=>v.correct).length;
+      const accuracy = totalQAnswered > 0 ? Math.round(totalCorrect/totalQAnswered*100) : 0;
+
+      document.getElementById('total-lec').textContent = totalLecViewed;
+      document.getElementById('total-q').textContent   = totalQAnswered;
+      document.getElementById('q-acc').textContent     = totalQAnswered > 0 ? `${accuracy}% accuracy` : 'No questions answered yet';
+      document.getElementById('overall-score').textContent = totalQAnswered > 0 ? `${totalCorrect}/${totalQAnswered}` : '—';
+
+      // ── Per subject ──────────────────────────────────────────────────
+      const subjectData = {};
+      Object.entries(SUBJECTS).forEach(([key, meta]) => {
+        const totalLecs   = allLecs.filter(l=>l.subject===key).length;
+        const viewedLecs  = Object.values(lecsDone).filter(l=>l.subject===key).length;
+        const totalQs     = allQs.filter(q=>q.subject===key).length;
+        const answeredQs  = Object.values(qAnswered).filter(q=>q.subject===key).length;
+        const correctQs   = Object.values(qAnswered).filter(q=>q.subject===key && q.correct).length;
+        subjectData[key]  = { meta, totalLecs, viewedLecs, totalQs, answeredQs, correctQs };
+      });
+
+      const grid = document.getElementById('subjects-grid');
+      grid.innerHTML = Object.entries(subjectData).map(([key, d]) => {
+        const lecPct = d.totalLecs > 0 ? Math.round(d.viewedLecs/d.totalLecs*100) : 0;
+        const qAcc   = d.answeredQs > 0 ? Math.round(d.correctQs/d.answeredQs*100) : null;
+        return `
+          <div class="subj-card">
+            <div class="subj-header">
+              <div class="subj-dot" style="background:${d.meta.color}"></div>
+              <div class="subj-name">${d.meta.label}</div>
+            </div>
+            <div class="prog-bar-wrap">
+              <div class="prog-bar" style="width:${lecPct}%;background:${d.meta.color}"></div>
+            </div>
+            <div class="subj-stats">
+              <div>Lectures: <span>${d.viewedLecs} / ${d.totalLecs}</span></div>
+              <div>Questions: <span>${d.answeredQs}</span>${qAcc!==null?` (<span style="color:${d.meta.color}">${qAcc}%</span>)`:''}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      // ── Recent activity ──────────────────────────────────────────────
+      const activities = [];
+
+      Object.entries(lecsDone).forEach(([id, v]) => {
+        activities.push({ type:'lecture', title:v.title||id, subject:v.subject, date:v.date, icon:'📖' });
+      });
+      Object.entries(qAnswered).forEach(([id, v]) => {
+        activities.push({ type:'question', title:`Question answered`, subject:v.subject, date:v.date, icon: v.correct ? '✅':'❌', correct:v.correct });
+      });
+
+      activities.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+      const recent = activities.slice(0, 20);
+
+      const actEl = document.getElementById('activity-list');
+      if (recent.length === 0) {
+        actEl.innerHTML = '<div class="empty-msg">No activity yet. Start studying to see your progress here! 🚀</div>';
+      } else {
+        const subColor = {MGD:'#5b39f3',Metabolism:'#f59e0b',TOB:'#10b981',HD:'#ef4444'};
+        actEl.innerHTML = recent.map(a => {
+          const color = subColor[a.subject] || '#5b39f3';
+          const badgeStyle = `background:${color}18;color:${color}`;
+          const dateStr = a.date ? new Date(a.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+          return `<div class="activity-item">
+            <div class="act-icon">${a.icon}</div>
+            <div class="act-title">${a.title}</div>
+            <span class="act-badge" style="${badgeStyle}">${a.subject==='HD'?'H&D':a.subject||'—'}</span>
+            <div class="act-meta">${dateStr}</div>
+          </div>`;
+        }).join('');
+      }
+
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    } catch(err) {
+      console.error(err);
+      document.getElementById('loader').innerHTML = '<div style="color:#ef4444;padding:40px;text-align:center">Error loading progress. Please try again.</div>';
+    }
+  });
+
+  function injectUserNav(name) {
+    const ctaEl = document.getElementById('nav-cta-slot');
+    if (!ctaEl) return;
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;align-items:center;gap:10px';
+    wrapper.innerHTML = `
+      <div style="position:relative">
+        <button id="user-menu-btn" style="display:flex;align-items:center;gap:7px;background:#5b39f3;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+          👤 ${name.split(' ')[0]} ▾
+        </button>
+        <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100%+6px);background:#fff;border:1px solid rgba(91,57,243,.12);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,45,.1);z-index:200">
+          <a href="admin.html" style="display:block;padding:8px 12px;font-size:12px;font-weight:600;color:#00002d;border-radius:6px;text-decoration:none;opacity:.7">⚡ Admin Panel</a>
+          <div style="height:1px;background:rgba(91,57,243,.1);margin:4px 0"></div>
+          <button id="logout-btn" style="width:100%;text-align:left;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#dc2626;background:transparent;border:none;border-radius:6px;cursor:pointer;">🚪 Sign Out</button>
+        </div>
+      </div>`;
+    ctaEl.replaceWith(wrapper);
+    document.getElementById('user-menu-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      const m = document.getElementById('user-menu');
+      m.style.display = m.style.display === 'none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', () => { const m = document.getElementById('user-menu'); if(m) m.style.display='none'; });
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(__auth).then(() => window.location.replace('login.html')));
+  }
+</script>
+</body>
+</html>
