@@ -441,8 +441,13 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 let weekOffset = 0;
 const today    = new Date();
 const todayKey = today.toISOString().split('T')[0];
-const getTasks  = () => JSON.parse(localStorage.getItem('plura_tasks') || '{}');
-const saveTasks = t  => localStorage.setItem('plura_tasks', JSON.stringify(t));
+
+// ── Per-user task storage ──────────────────────────────────────────
+// UID is injected by the Firebase module once auth resolves
+let _scheduleUID = null;
+const taskKey   = () => _scheduleUID ? `plura_tasks_${_scheduleUID}` : '__loading__';
+const getTasks  = () => _scheduleUID ? JSON.parse(localStorage.getItem(taskKey()) || '{}') : {};
+const saveTasks = t  => { if (_scheduleUID) localStorage.setItem(taskKey(), JSON.stringify(t)); };
 
 function addTask() {
   const inp  = document.getElementById('task-input');
@@ -537,11 +542,22 @@ function updateStreak() {
     else break;
   }
   document.getElementById('streak-num').textContent = streak;
-  localStorage.setItem('plura_streak', streak);
+  if (_scheduleUID) localStorage.setItem(`plura_streak_${_scheduleUID}`, streak);
 }
 
-document.getElementById('streak-num').textContent = localStorage.getItem('plura_streak') || 0;
-render();
+// Called by the Firebase module after auth resolves
+window.setUserUID = function(uid) {
+  _scheduleUID = uid;
+  // Migrate old global tasks to per-user key (one-time migration)
+  const old = localStorage.getItem('plura_tasks');
+  if (old && !localStorage.getItem(`plura_tasks_${uid}`)) {
+    localStorage.setItem(`plura_tasks_${uid}`, old);
+  }
+  const streak = localStorage.getItem(`plura_streak_${uid}`) || localStorage.getItem('plura_streak') || 0;
+  document.getElementById('streak-num').textContent = streak;
+  render();
+  pomoInitWithUID(uid);
+};
 
 </script>
 
@@ -571,6 +587,8 @@ render();
   onAuthStateChanged(__auth2, async user => {
     if (!user) { window.location.replace('login.html'); return; }
     __ov2.remove();
+    // Set per-user keys for tasks and pomodoro BEFORE rendering
+    if (typeof window.setUserUID === 'function') window.setUserUID(user.uid);
     try {
       const usnap = await getDoc(doc(db, 'users', user.uid));
       const name  = usnap.exists() ? (usnap.data().name || 'Student') : 'Student';
@@ -626,73 +644,205 @@ render();
 
 <script>
 
-  // ── POMODORO LOGIC ──────────────────────────────────────────────
-  let pomoTimer = null;
-  let pomoSecondsLeft = 25 * 60;
-  let pomoTotalSeconds = 25 * 60;
-  let pomoRunning = false;
-  let pomoMode = 'focus'; // 'focus' | 'break' | 'long'
-  let pomoSessionCount = 0;
+  // ── POMODORO LOGIC (timestamp-based — survives page navigation) ──
+
   const CIRCUMFERENCE = 2 * Math.PI * 80; // 502.65
 
-  const pomoTodayKey = 'pomo_' + new Date().toISOString().split('T')[0];
-  let pomoStats = JSON.parse(localStorage.getItem(pomoTodayKey) || '{"sessions":0,"mins":0}');
+  // State lives in localStorage so it persists across pages
+  // Key: 'pomo_state'  (per-user key set after auth; falls back to anonymous)
+  let _pomoStateKey  = 'pomo_state';
+  let _pomoStatsKey  = 'pomo_stats_' + new Date().toISOString().split('T')[0];
 
-  function getFocusMins()  { return parseInt(document.getElementById('sl-focus').value); }
-  function getBreakMins()  { return parseInt(document.getElementById('sl-break').value); }
-  function getLongMins()   { return parseInt(document.getElementById('sl-long').value); }
+  // Called by setUserUID() after auth
+  window.pomoInitWithUID = function(uid) {
+    _pomoStateKey = `pomo_state_${uid}`;
+    _pomoStatsKey = `pomo_stats_${uid}_` + new Date().toISOString().split('T')[0];
+    // Migrate anonymous state if it exists and user has none
+    const anon = localStorage.getItem('pomo_state');
+    if (anon && !localStorage.getItem(_pomoStateKey)) {
+      localStorage.setItem(_pomoStateKey, anon);
+    }
+    _pomoRestoreOrInit();
+  };
 
-  function pomoUpdateSettings() {
+  function _pomoGetState() {
+    return JSON.parse(localStorage.getItem(_pomoStateKey) || 'null');
+  }
+  function _pomoSaveState(s) {
+    localStorage.setItem(_pomoStateKey, JSON.stringify(s));
+  }
+  function _pomoGetStats() {
+    return JSON.parse(localStorage.getItem(_pomoStatsKey) || '{"sessions":0,"mins":0}');
+  }
+  function _pomoSaveStats(s) {
+    localStorage.setItem(_pomoStatsKey, JSON.stringify(s));
+  }
+
+  // Runtime variables (rebuilt from state on load)
+  let pomoTimer        = null;
+  let pomoSecondsLeft  = 25 * 60;
+  let pomoTotalSeconds = 25 * 60;
+  let pomoRunning      = false;
+  let pomoMode         = 'focus';
+  let pomoSessionCount = 0;
+
+  function getFocusMins() { return parseInt(document.getElementById('sl-focus').value); }
+  function getBreakMins() { return parseInt(document.getElementById('sl-break').value); }
+  function getLongMins()  { return parseInt(document.getElementById('sl-long').value); }
+
+  // ── Restore timer from saved state (called on page load / after auth)
+  function _pomoRestoreOrInit() {
+    const st = _pomoGetState();
+    if (!st) { _pomoApplyDefaults(); return; }
+
+    // Restore slider positions
+    document.getElementById('sl-focus').value = st.focusMins || 25;
+    document.getElementById('sl-break').value = st.breakMins || 5;
+    document.getElementById('sl-long').value  = st.longMins  || 15;
+    pomoUpdateSettings(false); // update display labels, don't reset timer
+
+    pomoMode         = st.mode         || 'focus';
+    pomoTotalSeconds = st.totalSeconds || getFocusMins() * 60;
+    pomoSessionCount = st.sessionCount || 0;
+
+    if (st.running && st.deadlineMs) {
+      // Calculate how many seconds remain based on wall-clock
+      const remaining = Math.ceil((st.deadlineMs - Date.now()) / 1000);
+      if (remaining <= 0) {
+        // Timer expired while away — advance phase silently
+        _pomoHandleExpiredWhileAway(st);
+        return;
+      }
+      pomoSecondsLeft = remaining;
+      pomoRunning = false; // will be started below
+      pomoUpdateDisplay();
+      // Auto-resume
+      _pomoStartInterval();
+    } else {
+      // Was paused — restore seconds from saved elapsed
+      pomoSecondsLeft = st.secondsLeft != null ? st.secondsLeft : getFocusMins() * 60;
+      pomoRunning = false;
+      document.getElementById('btn-pomo-start').textContent = st.secondsLeft ? '▶ Resume' : '▶ Start';
+      pomoUpdateDisplay();
+    }
+
+    pomoUpdateStats();
+    pomoUpdateDots();
+  }
+
+  function _pomoHandleExpiredWhileAway(st) {
+    // One phase completed while away — advance to next
+    if (st.mode === 'focus') {
+      const stats = _pomoGetStats();
+      stats.sessions++;
+      stats.mins += (st.focusMins || 25);
+      _pomoSaveStats(stats);
+      pomoSessionCount = (st.sessionCount || 0) + 1;
+      pomoMode = (pomoSessionCount % 4 === 0) ? 'long' : 'break';
+      pomoSecondsLeft = pomoMode === 'long' ? getLongMins() * 60 : getBreakMins() * 60;
+    } else {
+      pomoSessionCount = st.sessionCount || 0;
+      pomoMode = 'focus';
+      pomoSecondsLeft = getFocusMins() * 60;
+    }
+    pomoTotalSeconds = pomoSecondsLeft;
+    pomoRunning = false;
+    _pomoSaveState({ mode: pomoMode, totalSeconds: pomoTotalSeconds, secondsLeft: pomoSecondsLeft,
+      sessionCount: pomoSessionCount, running: false,
+      focusMins: getFocusMins(), breakMins: getBreakMins(), longMins: getLongMins() });
+    document.getElementById('btn-pomo-start').textContent = '▶ Start';
+    pomoUpdateDisplay();
+    pomoUpdateStats();
+    pomoUpdateDots();
+  }
+
+  function _pomoApplyDefaults() {
+    pomoMode = 'focus';
+    pomoSecondsLeft = getFocusMins() * 60;
+    pomoTotalSeconds = pomoSecondsLeft;
+    pomoRunning = false;
+    document.getElementById('btn-pomo-start').textContent = '▶ Start';
+    pomoUpdateDisplay();
+    pomoUpdateStats();
+    pomoUpdateDots();
+  }
+
+  // ── Controls
+  function pomoUpdateSettings(resetTimer = true) {
     document.getElementById('val-focus').textContent = getFocusMins();
     document.getElementById('val-break').textContent = getBreakMins();
     document.getElementById('val-long').textContent  = getLongMins();
-    if (!pomoRunning) pomoReset();
+    if (resetTimer && !pomoRunning) pomoReset();
   }
 
   function pomoReset() {
     clearInterval(pomoTimer);
+    pomoTimer = null;
     pomoRunning = false;
     pomoMode = 'focus';
     pomoSecondsLeft = getFocusMins() * 60;
     pomoTotalSeconds = pomoSecondsLeft;
     document.getElementById('btn-pomo-start').textContent = '▶ Start';
+    _pomoSaveState({ mode:'focus', totalSeconds:pomoTotalSeconds, secondsLeft:pomoSecondsLeft,
+      sessionCount:pomoSessionCount, running:false,
+      focusMins:getFocusMins(), breakMins:getBreakMins(), longMins:getLongMins() });
     pomoUpdateDisplay();
   }
 
   function pomoToggle() {
     if (pomoRunning) {
+      // Pause
       clearInterval(pomoTimer);
+      pomoTimer = null;
       pomoRunning = false;
       document.getElementById('btn-pomo-start').textContent = '▶ Resume';
+      _pomoSaveState({ mode:pomoMode, totalSeconds:pomoTotalSeconds, secondsLeft:pomoSecondsLeft,
+        sessionCount:pomoSessionCount, running:false,
+        focusMins:getFocusMins(), breakMins:getBreakMins(), longMins:getLongMins() });
     } else {
-      pomoRunning = true;
-      document.getElementById('btn-pomo-start').textContent = '⏸ Pause';
-      pomoTimer = setInterval(() => {
-        pomoSecondsLeft--;
-        pomoUpdateDisplay();
-        if (pomoSecondsLeft <= 0) pomoNextPhase();
-      }, 1000);
+      _pomoStartInterval();
     }
+  }
+
+  function _pomoStartInterval() {
+    pomoRunning = true;
+    document.getElementById('btn-pomo-start').textContent = '⏸ Pause';
+    // Save deadline timestamp so we can recover after navigation
+    const deadline = Date.now() + pomoSecondsLeft * 1000;
+    _pomoSaveState({ mode:pomoMode, totalSeconds:pomoTotalSeconds, deadlineMs:deadline,
+      secondsLeft:pomoSecondsLeft, sessionCount:pomoSessionCount, running:true,
+      focusMins:getFocusMins(), breakMins:getBreakMins(), longMins:getLongMins() });
+    pomoTimer = setInterval(() => {
+      // Always derive secondsLeft from wall-clock to stay accurate
+      const st = _pomoGetState();
+      if (st && st.deadlineMs) {
+        pomoSecondsLeft = Math.max(0, Math.ceil((st.deadlineMs - Date.now()) / 1000));
+      } else {
+        pomoSecondsLeft = Math.max(0, pomoSecondsLeft - 1);
+      }
+      pomoUpdateDisplay();
+      if (pomoSecondsLeft <= 0) pomoNextPhase();
+    }, 500); // 500ms for smoother display
   }
 
   function pomoNextPhase() {
     clearInterval(pomoTimer);
+    pomoTimer = null;
     pomoRunning = false;
 
     if (pomoMode === 'focus') {
-      // Completed a focus session
       pomoSessionCount++;
-      pomoStats.sessions++;
-      pomoStats.mins += getFocusMins();
-      localStorage.setItem(pomoTodayKey, JSON.stringify(pomoStats));
+      const stats = _pomoGetStats();
+      stats.sessions++;
+      stats.mins += getFocusMins();
+      _pomoSaveStats(stats);
       pomoUpdateStats();
       pomoUpdateDots();
 
-      // Play soft bell
+      // Bell
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
+        const o = ctx.createOscillator(); const g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination);
         o.frequency.value = 880; o.type = 'sine';
         g.gain.setValueAtTime(0.3, ctx.currentTime);
@@ -700,25 +850,20 @@ render();
         o.start(); o.stop(ctx.currentTime + 1.2);
       } catch(e) {}
 
-      // After 4 sessions = long break
-      if (pomoSessionCount % 4 === 0) {
-        pomoMode = 'long';
-        pomoSecondsLeft = getLongMins() * 60;
-      } else {
-        pomoMode = 'break';
-        pomoSecondsLeft = getBreakMins() * 60;
-      }
+      pomoMode = (pomoSessionCount % 4 === 0) ? 'long' : 'break';
+      pomoSecondsLeft = pomoMode === 'long' ? getLongMins() * 60 : getBreakMins() * 60;
     } else {
-      // Break done → back to focus
       pomoMode = 'focus';
       pomoSecondsLeft = getFocusMins() * 60;
     }
 
     pomoTotalSeconds = pomoSecondsLeft;
-    pomoUpdateDisplay();
     document.getElementById('btn-pomo-start').textContent = '▶ Start';
+    _pomoSaveState({ mode:pomoMode, totalSeconds:pomoTotalSeconds, secondsLeft:pomoSecondsLeft,
+      sessionCount:pomoSessionCount, running:false,
+      focusMins:getFocusMins(), breakMins:getBreakMins(), longMins:getLongMins() });
+    pomoUpdateDisplay();
 
-    // Show browser notification if allowed
     if (Notification.permission === 'granted') {
       new Notification('Plura Medical 🍅', {
         body: pomoMode === 'focus' ? 'Break over! Time to focus 💪' : 'Session done! Take a break ☕',
@@ -731,19 +876,14 @@ render();
     const m = Math.floor(pomoSecondsLeft / 60).toString().padStart(2, '0');
     const s = (pomoSecondsLeft % 60).toString().padStart(2, '0');
     document.getElementById('pomo-digits').textContent = `${m}:${s}`;
-
     const modeLabels = { focus: 'Focus 🎯', break: 'Short Break ☕', long: 'Long Break 🌿' };
     document.getElementById('pomo-mode-label').textContent = modeLabels[pomoMode];
-
-    // Ring progress
-    const progress = pomoSecondsLeft / pomoTotalSeconds;
+    const progress = pomoTotalSeconds > 0 ? pomoSecondsLeft / pomoTotalSeconds : 1;
     const offset = CIRCUMFERENCE * (1 - progress);
     const ring = document.getElementById('pomo-ring');
     ring.style.strokeDashoffset = offset;
     ring.style.strokeDasharray = CIRCUMFERENCE;
     ring.classList.toggle('break', pomoMode !== 'focus');
-
-    // Page title
     document.title = `${m}:${s} — Plura Medical`;
   }
 
@@ -755,21 +895,20 @@ render();
   }
 
   function pomoUpdateStats() {
-    document.getElementById('pomo-stat-sessions').textContent = pomoStats.sessions;
-    document.getElementById('pomo-stat-mins').textContent = pomoStats.mins;
+    const stats = _pomoGetStats();
+    document.getElementById('pomo-stat-sessions').textContent = stats.sessions;
+    document.getElementById('pomo-stat-mins').textContent = stats.mins;
     document.getElementById('pomo-stat-streak').textContent =
-      localStorage.getItem('plura_streak') || 0;
+      (_scheduleUID ? localStorage.getItem(`plura_streak_${_scheduleUID}`) : null)
+      || localStorage.getItem('plura_streak') || 0;
   }
 
-  // Request notification permission
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 
-  // Init
-  pomoUpdateDisplay();
-  pomoUpdateStats();
-  pomoUpdateDots();
+  // Init with anonymous key (will be replaced by pomoInitWithUID after auth)
+  _pomoRestoreOrInit();
 
 </script>
 
