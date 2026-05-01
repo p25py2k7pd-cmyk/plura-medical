@@ -134,6 +134,11 @@
       .bottom-nav{display:flex;}
       body{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));}
 
+      /* Nav user controls (My Progress + user menu) */
+      #nav-user-controls{gap:5px !important;}
+      #nav-user-controls a{padding:5px 9px !important;font-size:10px !important;gap:3px !important;border-radius:6px !important;}
+      #nav-user-controls button{padding:5px 10px !important;font-size:10px !important;gap:4px !important;border-radius:6px !important;}
+
       /* Larger tap targets */
       .btn-primary,.btn-ghost{padding:15px 28px;font-size:14px;}
       .pill{padding:9px 20px;font-size:13px;}
@@ -381,6 +386,7 @@
     const ctaEl = document.getElementById('nav-cta-slot');
     if (!ctaEl) return;
     const wrapper = document.createElement('div');
+    wrapper.id = 'nav-user-controls';
     wrapper.style.cssText = 'display:flex;align-items:center;gap:10px';
     wrapper.innerHTML = `
       <div style="position:relative">
