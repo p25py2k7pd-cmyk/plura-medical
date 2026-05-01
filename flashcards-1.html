@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashcards — Plura Medical</title>
+  <meta name="description" content="Study with spaced-repetition flashcards on Plura Medical."/>
+  <meta name="theme-color" content="#5b39f3"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,900;1,700&display=swap" rel="stylesheet">
   <style>
     @font-face {
@@ -329,11 +331,11 @@
 
 <!-- FILTER -->
 <div class="filter-bar">
-  <button class="pill active" data-filter="all">All</button>
-  <button class="pill" data-filter="MGD">MGD</button>
-  <button class="pill" data-filter="Metabolism">Metabolism</button>
-  <button class="pill" data-filter="TOB">TOB</button>
-  <button class="pill" data-filter="HD">H&amp;D</button>
+  <button class="pill active" data-filter="all"        onclick="setFilter('all')">All</button>
+  <button class="pill"        data-filter="MGD"        onclick="setFilter('MGD')">MGD</button>
+  <button class="pill"        data-filter="Metabolism" onclick="setFilter('Metabolism')">Metabolism</button>
+  <button class="pill"        data-filter="TOB"        onclick="setFilter('TOB')">TOB</button>
+  <button class="pill"        data-filter="HD"         onclick="setFilter('HD')">H&amp;D</button>
   <span class="card-count" id="card-count-top">0 cards</span>
 </div>
 
@@ -866,24 +868,19 @@
   /* ════════════════════════════════════════
      EXPOSE GLOBALS (needed for onclick attrs)
   ════════════════════════════════════════ */
-  window.flipCard = flipCard;
-  window.nextCard = nextCard;
-  window.prevCard = prevCard;
-  window.rateSRS  = rateSRS;
-  window.studyAll = studyAll;
-
-  /* ════════════════════════════════════════
-     FILTER PILLS
-  ════════════════════════════════════════ */
-  document.querySelectorAll('.pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      __activeFilter = btn.dataset.filter;
-      __forceAll     = false;
-      loadCards();
-    });
-  });
+  window.flipCard  = flipCard;
+  window.nextCard  = nextCard;
+  window.prevCard  = prevCard;
+  window.rateSRS   = rateSRS;
+  window.studyAll  = studyAll;
+  window.setFilter = function(value) {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    const active = document.querySelector('.pill[data-filter="' + value + '"]');
+    if (active) active.classList.add('active');
+    __activeFilter = value;
+    __forceAll     = false;
+    loadCards();
+  };
 
   /* ════════════════════════════════════════
      KEYBOARD  (1=Hard  2=Good  3=Easy)

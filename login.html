@@ -7,6 +7,8 @@
   <link rel="apple-touch-icon" href="plurasiteicon.png"/>
   <link rel="icon" type="image/png" href="plurasiteicon.png"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="description" content="Sign in to Plura Medical — your medical study platform."/>
+  <meta name="theme-color" content="#5b39f3"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -53,6 +55,14 @@
     .success-msg{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#16a34a;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:16px;display:none}
 
     .hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* Password wrapper */
+    .pw-wrap{position:relative}
+    .pw-wrap input{padding-right:42px}
+    .pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);
+      font-size:16px;line-height:1;display:flex;align-items:center;}
+    .pw-eye:hover{color:var(--navy);}
 
     /* Loading overlay */
     #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
@@ -215,7 +225,10 @@
       </div>
       <div class="field">
         <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required/>
+        <div class="pw-wrap">
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required/>
+          <button type="button" class="pw-eye" onclick="togglePw('login-password',this)" aria-label="Show password">👁</button>
+        </div>
       </div>
       <button class="btn" type="submit" id="login-btn">Sign In</button>
     </form>
@@ -228,20 +241,26 @@
       <div id="reg-success" class="success-msg"></div>
       <div class="field">
         <label>Full Name</label>
-        <input type="text" id="reg-name" placeholder="Ahmad Al-Farsi" required/>
+        <input type="text" id="reg-name" placeholder="Ahmad Al-Farsi" autocomplete="name" required/>
       </div>
       <div class="field">
         <label>Username</label>
-        <input type="text" id="reg-username" placeholder="ahmad123" pattern="[a-zA-Z0-9_]{3,20}" required/>
+        <input type="text" id="reg-username" placeholder="ahmad123" pattern="[a-zA-Z0-9_]{3,20}" autocomplete="username" required/>
         <div class="hint">3-20 characters, letters, numbers, underscores only</div>
       </div>
       <div class="field">
         <label>Password</label>
-        <input type="password" id="reg-password" placeholder="Min 6 characters" minlength="6" required/>
+        <div class="pw-wrap">
+          <input type="password" id="reg-password" placeholder="Min 6 characters" minlength="6" autocomplete="new-password" required/>
+          <button type="button" class="pw-eye" onclick="togglePw('reg-password',this)" aria-label="Show password">👁</button>
+        </div>
       </div>
       <div class="field">
         <label>Confirm Password</label>
-        <input type="password" id="reg-confirm" placeholder="Repeat password" required/>
+        <div class="pw-wrap">
+          <input type="password" id="reg-confirm" placeholder="Repeat password" autocomplete="new-password" required/>
+          <button type="button" class="pw-eye" onclick="togglePw('reg-confirm',this)" aria-label="Show password">👁</button>
+        </div>
       </div>
       <button class="btn" type="submit" id="reg-btn">Create Account</button>
     </form>
@@ -365,6 +384,15 @@
 </script>
 
 <script>
+
+  /* ── PASSWORD VISIBILITY TOGGLE ─────────────────────────────── */
+  function togglePw(id, btn) {
+    var inp = document.getElementById(id);
+    if (!inp) return;
+    var show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+  }
 
   /* ── MOBILE NAV ──────────────────────────────────────────────── */
   (function(){
