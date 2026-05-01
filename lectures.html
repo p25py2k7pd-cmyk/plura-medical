@@ -83,7 +83,94 @@
       .page-hero h1{font-size:28px;}
       .pill{padding:6px 12px;font-size:11px;}
     }
-  </style>
+  
+    /* ═══ MOBILE NAVIGATION ════════════════════════════════════════════ */
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;
+      padding:8px;border-radius:8px;border:none;background:transparent;
+      -webkit-tap-highlight-color:transparent;flex-shrink:0;}
+    .hamburger span{width:22px;height:2px;background:var(--navy);border-radius:2px;
+      transition:all .3s cubic-bezier(.4,0,.2,1);display:block;}
+    .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+    .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+    .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+    .mobile-menu{display:none;position:fixed;inset:0;top:61px;
+      background:rgba(247,245,255,0.98);backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);z-index:90;flex-direction:column;
+      align-items:stretch;padding:16px 20px 100px;overflow-y:auto;
+      animation:menuFade .22s ease;}
+    @keyframes menuFade{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+    .mobile-menu.open{display:flex;}
+    .mobile-menu-link{font-size:17px;font-weight:700;color:var(--navy);
+      padding:15px 18px;border-radius:14px;text-decoration:none;
+      transition:all .18s;display:block;-webkit-tap-highlight-color:transparent;}
+    .mobile-menu-link:active,.mobile-menu-link:focus{background:rgba(91,57,243,.1);color:var(--purple);}
+    .mobile-menu-link.active{color:var(--purple);background:rgba(91,57,243,.07);}
+    .mobile-menu-divider{height:1px;background:var(--border);margin:8px 0;}
+    .mobile-menu-cta{display:block;background:var(--purple);color:#fff !important;
+      text-align:center;padding:14px 18px;border-radius:14px;font-size:15px;
+      font-weight:700;text-decoration:none;margin-top:6px;
+      -webkit-tap-highlight-color:transparent;}
+    .mobile-menu-cta:active{background:var(--navy);}
+
+    /* ═══ BOTTOM NAV BAR ══════════════════════════════════════════════ */
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;
+      background:rgba(247,245,255,0.97);backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);
+      padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));z-index:200;
+      flex-direction:row;justify-content:space-around;box-shadow:0 -4px 24px rgba(0,0,45,.06);}
+    .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;
+      padding:7px 12px;border-radius:12px;color:var(--muted);font-size:9.5px;
+      font-weight:600;text-decoration:none;transition:all .18s;
+      -webkit-tap-highlight-color:transparent;min-width:52px;}
+    .bn-item:active{transform:scale(0.9);}
+    .bn-item.active{color:var(--purple);}
+    .bn-icon{font-size:21px;line-height:1;display:block;}
+
+    /* ═══ TOUCH ENHANCEMENTS ══════════════════════════════════════════ */
+    *{-webkit-tap-highlight-color:transparent;}
+    button,a,[onclick]{-webkit-touch-callout:none;}
+
+    @media(hover:none){
+      .subject-card:active,.lec-card:active,.lecture-item:active,
+      .fc-card:active,.schedule-block:active,.exam-card:active{
+        transform:scale(0.97) !important;border-color:var(--purple) !important;}
+      .btn-primary:active,.btn-ghost:active,.btn-study-all:active{
+        transform:scale(0.96) !important;opacity:.88;}
+      .pill:active,.btn-fc:active{transform:scale(0.94);}
+      .btn-srs:active{transform:scale(0.95);}
+    }
+
+    /* ═══ RESPONSIVE BREAKPOINTS ══════════════════════════════════════ */
+    @media(max-width:768px){
+      .hamburger{display:flex;}
+      .nav-links{display:none !important;}
+      .nav-cta{display:none !important;}
+      .bottom-nav{display:flex;}
+      body{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));}
+
+      /* Larger tap targets */
+      .btn-primary,.btn-ghost{padding:15px 28px;font-size:14px;}
+      .pill{padding:9px 20px;font-size:13px;}
+      .btn-srs{min-width:88px;padding:12px 10px;}
+      .btn-fc{width:48px;height:48px;}
+
+      /* Cards fill width on small screens */
+      .subjects-grid{grid-template-columns:1fr 1fr;}
+      .lec-card,.fc-card{touch-action:manipulation;}
+      .lecture-item{padding:16px 14px;gap:10px;}
+
+      /* Flip card touch */
+      .flip-wrap{cursor:pointer;touch-action:manipulation;}
+    }
+
+    @media(max-width:480px){
+      .subjects-grid{grid-template-columns:1fr;}
+      .hero h1,.page-hero h1{font-size:30px;letter-spacing:-1px;}
+      .stats-bar{flex-wrap:wrap;}
+      .stat{flex:1 1 45%;}
+    }
+</style>
 </head>
 <body>
 <nav class="navbar">
@@ -119,7 +206,24 @@
     <li><a href="schedule.html">Schedule</a></li>
   </ul>
   <a href="admin.html" class="nav-cta">Admin ⚡</a>
+
+    <button class="hamburger" id="plura-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
 </nav>
+
+<!-- Mobile Menu Drawer -->
+<div id="plura-mobile-menu" class="mobile-menu">
+      <a href="index.html" class="mobile-menu-link">Home</a>
+      <a href="lectures.html" class="mobile-menu-link active">Lectures</a>
+      <a href="exams.html" class="mobile-menu-link">Exams</a>
+      <a href="flashcards-1.html" class="mobile-menu-link">Flashcards</a>
+      <a href="schedule.html" class="mobile-menu-link">Schedule</a>
+      <a href="progress.html" class="mobile-menu-link">My Progress</a>
+      <div class="mobile-menu-divider"></div>
+      <a href="admin.html" class="mobile-menu-cta">Admin ⚡</a>
+</div>
+
 <div class="page-hero">
   <div><h1>Lectures</h1><p class="page-hero-sub">Browse all lecture PDFs by subject</p></div>
   <span class="lec-count" id="lec-count">0 lectures</span>
@@ -289,6 +393,32 @@
   });
   document.getElementById('pdf-modal').addEventListener('click',e=>{if(e.target.id==='pdf-modal')closePDF();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closePDF();});
+</script>
+
+<nav class="bottom-nav"><a href="index.html" class="bn-item"><span class="bn-icon">🏠</span>Home</a><a href="lectures.html" class="bn-item active"><span class="bn-icon">📚</span>Lectures</a><a href="flashcards-1.html" class="bn-item"><span class="bn-icon">🃏</span>Cards</a><a href="exams.html" class="bn-item"><span class="bn-icon">📝</span>Exams</a><a href="schedule.html" class="bn-item"><span class="bn-icon">📅</span>Schedule</a></nav>
+
+<script>
+
+  /* ── MOBILE NAV ──────────────────────────────────────────────── */
+  (function(){
+    var hb = document.getElementById('plura-hamburger');
+    var mm = document.getElementById('plura-mobile-menu');
+    if(!hb||!mm) return;
+    function close(){hb.classList.remove('open');mm.classList.remove('open');document.body.style.overflow='';}
+    hb.addEventListener('click',function(e){
+      e.stopPropagation();
+      var isOpen = mm.classList.contains('open');
+      if(isOpen){close();}
+      else{hb.classList.add('open');mm.classList.add('open');document.body.style.overflow='hidden';}
+    });
+    mm.querySelectorAll('a').forEach(function(a){a.addEventListener('click',close);});
+    document.addEventListener('click',function(e){
+      if(!mm.contains(e.target)&&!hb.contains(e.target)) close();
+    });
+    // Close on scroll
+    window.addEventListener('scroll',close,{passive:true});
+  })();
+
 </script>
 </body>
 </html>
